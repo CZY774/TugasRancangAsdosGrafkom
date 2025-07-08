@@ -84,6 +84,77 @@ void drawWalls() {
     drawQuad(halfW, 0, -halfL,  halfW, 0, halfL,  halfW, WALL_HEIGHT, halfL,  halfW, WALL_HEIGHT, -halfL);
 }
 
+void drawJendelaBangunanSamping(float offsetX, float offsetZ) {
+    float jendelaW = 2.0f;
+    float jendelaH = 6.0f;
+    float gap = 0.5f;
+    float jendelaY = 2.0f;
+    float jendelaZ = offsetZ + 10.0f + 0.01f; // halfBoxL = 10
+
+    float jendelaX_kiri = offsetX - (jendelaW + gap / 2);
+    float jendelaX_kanan = offsetX + gap / 2;
+
+    glColor3f(0.7f, 0.7f, 0.7f); // abu terang
+    drawQuad(jendelaX_kiri, jendelaY, jendelaZ,
+             jendelaX_kiri + jendelaW, jendelaY, jendelaZ,
+             jendelaX_kiri + jendelaW, jendelaY + jendelaH, jendelaZ,
+             jendelaX_kiri, jendelaY + jendelaH, jendelaZ);
+
+    drawQuad(jendelaX_kanan, jendelaY, jendelaZ,
+             jendelaX_kanan + jendelaW, jendelaY, jendelaZ,
+             jendelaX_kanan + jendelaW, jendelaY + jendelaH, jendelaZ,
+             jendelaX_kanan, jendelaY + jendelaH, jendelaZ);
+}
+
+
+
+void drawBangunanSamping() {
+    // Ukuran bangunan kotak
+    float boxWidth = 10.0f;
+    float boxLength = 14.0f;
+    float boxHeight = WALL_HEIGHT * 0.6f; // setengah lebih sedikit
+    float halfBoxW = boxWidth / 2;
+    float halfBoxL = boxLength / 2;
+    float jarakAntarBangunan = 8.0f; 
+
+    // Posisi: sebelah kiri pintu, agak mundur ke belakang
+    float offsetX = BUILDING_WIDTH / 2 + halfBoxW + jarakAntarBangunan;
+
+    float offsetZ = 8.0f; // agak masuk ke dalam
+
+    drawJendelaBangunanSamping(offsetX, offsetZ);
+    // Dinding (warna sama)
+    glColor3f(0.96f, 0.93f, 0.82f);
+    // Depan
+    drawQuad(offsetX - halfBoxW, 0, offsetZ + halfBoxL,
+             offsetX + halfBoxW, 0, offsetZ + halfBoxL,
+             offsetX + halfBoxW, boxHeight, offsetZ + halfBoxL,
+             offsetX - halfBoxW, boxHeight, offsetZ + halfBoxL);
+    // Belakang
+    drawQuad(offsetX - halfBoxW, 0, offsetZ - halfBoxL,
+             offsetX + halfBoxW, 0, offsetZ - halfBoxL,
+             offsetX + halfBoxW, boxHeight, offsetZ - halfBoxL,
+             offsetX - halfBoxW, boxHeight, offsetZ - halfBoxL);
+    // Kiri
+    drawQuad(offsetX - halfBoxW, 0, offsetZ - halfBoxL,
+             offsetX - halfBoxW, 0, offsetZ + halfBoxL,
+             offsetX - halfBoxW, boxHeight, offsetZ + halfBoxL,
+             offsetX - halfBoxW, boxHeight, offsetZ - halfBoxL);
+    // Kanan
+    drawQuad(offsetX + halfBoxW, 0, offsetZ - halfBoxL,
+             offsetX + halfBoxW, 0, offsetZ + halfBoxL,
+             offsetX + halfBoxW, boxHeight, offsetZ + halfBoxL,
+             offsetX + halfBoxW, boxHeight, offsetZ - halfBoxL);
+
+    // Atap datar (warna abu seperti atap utama)
+    glColor3f(0.6f, 0.6f, 0.7f);
+    drawQuad(offsetX - halfBoxW, boxHeight, offsetZ - halfBoxL,
+             offsetX + halfBoxW, boxHeight, offsetZ - halfBoxL,
+             offsetX + halfBoxW, boxHeight, offsetZ + halfBoxL,
+             offsetX - halfBoxW, boxHeight, offsetZ + halfBoxL);
+}
+
+
 void drawRoof() {
     glColor3f(0.6f, 0.6f, 0.7f);
 
@@ -154,6 +225,7 @@ void drawBuilding() {
     drawGround();
     drawWalls();
     drawRoof();
+    drawBangunanSamping(); 
 }
 
 void display() {
