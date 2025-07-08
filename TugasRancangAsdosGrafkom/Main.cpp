@@ -143,6 +143,205 @@ void drawBangunanDepan() {
              offsetX - halfBoxW, boxHeight, offsetZ + halfBoxL);
 }
 
+void drawTembokPendekDanTiangKanopi() {
+    float halfW = BUILDING_WIDTH / 2;
+    float zDepan = BUILDING_LENGTH / 2 + 0.5f;
+    float kanopiDepth = 15.5f;
+    float tembokHeight = WALL_HEIGHT / 4.0f;
+    float tembokThickness = 0.5f;
+
+    float zTembok = zDepan + kanopiDepth;
+
+    float tiangWidth = 0.7f;
+    float tiangDepth = 0.7f;
+    float kanopiY = 25.0f / 2.0f; // tinggi kanopi
+
+    // Posisi tiang
+    float tiang1X = 0.0f; // tengah
+    float tiang2X = halfW - tiangWidth/2; // kanan
+
+    // Tembok kecil hanya dari tepi kanan tiang tengah ke tepi kiri tiang kanan
+    float x1 = tiang1X + tiangWidth/2;
+    float x2 = tiang2X - tiangWidth/2;
+
+    glColor3f(0.96f, 0.93f, 0.82f);
+    // Depan tembok
+    drawQuad(
+        x1, 0, zTembok,
+        x2, 0, zTembok,
+        x2, tembokHeight, zTembok,
+        x1, tembokHeight, zTembok
+    );
+    // Belakang tembok
+    drawQuad(
+        x1, 0, zTembok + tembokThickness,
+        x2, 0, zTembok + tembokThickness,
+        x2, tembokHeight, zTembok + tembokThickness,
+        x1, tembokHeight, zTembok + tembokThickness
+    );
+    // Sisi kiri tembok
+    drawQuad(
+        x1, 0, zTembok,
+        x1, 0, zTembok + tembokThickness,
+        x1, tembokHeight, zTembok + tembokThickness,
+        x1, tembokHeight, zTembok
+    );
+    // Sisi kanan tembok
+    drawQuad(
+        x2, 0, zTembok,
+        x2, 0, zTembok + tembokThickness,
+        x2, tembokHeight, zTembok + tembokThickness,
+        x2, tembokHeight, zTembok
+    );
+    // Sisi atas tembok
+    drawQuad(
+        x1, tembokHeight, zTembok,
+        x2, tembokHeight, zTembok,
+        x2, tembokHeight, zTembok + tembokThickness,
+        x1, tembokHeight, zTembok + tembokThickness
+    );
+
+    // ================= TIANG KANOPI ===================
+    glColor3f(0.96f, 0.93f, 0.82f);
+
+    // Tiang tengah
+    float tiang1Z = zTembok;
+    drawQuad(
+        tiang1X - tiangWidth/2, 0, tiang1Z - tiangDepth/2,
+        tiang1X + tiangWidth/2, 0, tiang1Z - tiangDepth/2,
+        tiang1X + tiangWidth/2, kanopiY, tiang1Z - tiangDepth/2,
+        tiang1X - tiangWidth/2, kanopiY, tiang1Z - tiangDepth/2
+    );
+    drawQuad(
+        tiang1X - tiangWidth/2, 0, tiang1Z + tiangDepth/2,
+        tiang1X + tiangWidth/2, 0, tiang1Z + tiangDepth/2,
+        tiang1X + tiangWidth/2, kanopiY, tiang1Z + tiangDepth/2,
+        tiang1X - tiangWidth/2, kanopiY, tiang1Z + tiangDepth/2
+    );
+    // Sisi kiri & kanan tiang tengah
+    drawQuad(
+        tiang1X - tiangWidth/2, 0, tiang1Z - tiangDepth/2,
+        tiang1X - tiangWidth/2, 0, tiang1Z + tiangDepth/2,
+        tiang1X - tiangWidth/2, kanopiY, tiang1Z + tiangDepth/2,
+        tiang1X - tiangWidth/2, kanopiY, tiang1Z - tiangDepth/2
+    );
+    drawQuad(
+        tiang1X + tiangWidth/2, 0, tiang1Z - tiangDepth/2,
+        tiang1X + tiangWidth/2, 0, tiang1Z + tiangDepth/2,
+        tiang1X + tiangWidth/2, kanopiY, tiang1Z + tiangDepth/2,
+        tiang1X + tiangWidth/2, kanopiY, tiang1Z - tiangDepth/2
+    );
+    // Sisi atas & bawah tiang tengah
+    drawQuad(
+        tiang1X - tiangWidth/2, kanopiY, tiang1Z - tiangDepth/2,
+        tiang1X + tiangWidth/2, kanopiY, tiang1Z - tiangDepth/2,
+        tiang1X + tiangWidth/2, kanopiY, tiang1Z + tiangDepth/2,
+        tiang1X - tiangWidth/2, kanopiY, tiang1Z + tiangDepth/2
+    );
+    drawQuad(
+        tiang1X - tiangWidth/2, 0, tiang1Z - tiangDepth/2,
+        tiang1X + tiangWidth/2, 0, tiang1Z - tiangDepth/2,
+        tiang1X + tiangWidth/2, 0, tiang1Z + tiangDepth/2,
+        tiang1X - tiangWidth/2, 0, tiang1Z + tiangDepth/2
+    );
+
+    // Tiang kanan depan
+    float tiang2Z = zTembok;
+    drawQuad(
+        tiang2X - tiangWidth/2, 0, tiang2Z - tiangDepth/2,
+        tiang2X + tiangWidth/2, 0, tiang2Z - tiangDepth/2,
+        tiang2X + tiangWidth/2, kanopiY, tiang2Z - tiangDepth/2,
+        tiang2X - tiangWidth/2, kanopiY, tiang2Z - tiangDepth/2
+    );
+    drawQuad(
+        tiang2X - tiangWidth/2, 0, tiang2Z + tiangDepth/2,
+        tiang2X + tiangWidth/2, 0, tiang2Z + tiangDepth/2,
+        tiang2X + tiangWidth/2, kanopiY, tiang2Z + tiangDepth/2,
+        tiang2X - tiangWidth/2, kanopiY, tiang2Z + tiangDepth/2
+    );
+    // Sisi kiri & kanan tiang kanan
+    drawQuad(
+        tiang2X - tiangWidth/2, 0, tiang2Z - tiangDepth/2,
+        tiang2X - tiangWidth/2, 0, tiang2Z + tiangDepth/2,
+        tiang2X - tiangWidth/2, kanopiY, tiang2Z + tiangDepth/2,
+        tiang2X - tiangWidth/2, kanopiY, tiang2Z - tiangDepth/2
+    );
+    drawQuad(
+        tiang2X + tiangWidth/2, 0, tiang2Z - tiangDepth/2,
+        tiang2X + tiangWidth/2, 0, tiang2Z + tiangDepth/2,
+        tiang2X + tiangWidth/2, kanopiY, tiang2Z + tiangDepth/2,
+        tiang2X + tiangWidth/2, kanopiY, tiang2Z - tiangDepth/2
+    );
+    // Sisi atas & bawah tiang kanan
+    drawQuad(
+        tiang2X - tiangWidth/2, kanopiY, tiang2Z - tiangDepth/2,
+        tiang2X + tiangWidth/2, kanopiY, tiang2Z - tiangDepth/2,
+        tiang2X + tiangWidth/2, kanopiY, tiang2Z + tiangDepth/2,
+        tiang2X - tiangWidth/2, kanopiY, tiang2Z + tiangDepth/2
+    );
+    drawQuad(
+        tiang2X - tiangWidth/2, 0, tiang2Z - tiangDepth/2,
+        tiang2X + tiangWidth/2, 0, tiang2Z - tiangDepth/2,
+        tiang2X + tiangWidth/2, 0, tiang2Z + tiangDepth/2,
+        tiang2X - tiangWidth/2, 0, tiang2Z + tiangDepth/2
+    );
+}
+
+void drawTembokSampingPendek() {
+    float halfW = BUILDING_WIDTH / 2;
+    float zDepan = BUILDING_LENGTH / 2 ;
+    float kanopiDepth = 30.0f;
+    float tembokHeight = WALL_HEIGHT / 4.0f;
+    float tembokThickness = 0.5f;
+
+    // Panjang tembok samping (misal hanya 1/3 dari panjang kanopi)
+    float panjangTembok = kanopiDepth * 0.33f;
+
+    // Posisi X menempel ke sisi kanan gedung utama
+    float xTembok = halfW - tembokThickness;
+
+    // Z awal tembok (menempel ke depan gedung utama)
+    float zAwal = zDepan;
+    // Z akhir tembok (lebih ke depan, tapi tidak sampai ke tiang)
+    float zAkhir = zDepan + panjangTembok;
+
+    glColor3f(0.96f, 0.93f, 0.82f);
+    // Sisi luar tembok samping kanan
+    drawQuad(
+        xTembok, 0, zAwal,
+        xTembok, 0, zAkhir,
+        xTembok, tembokHeight, zAkhir,
+        xTembok, tembokHeight, zAwal
+    );
+    // Sisi dalam tembok samping kanan
+    drawQuad(
+        xTembok + tembokThickness, 0, zAwal,
+        xTembok + tembokThickness, 0, zAkhir,
+        xTembok + tembokThickness, tembokHeight, zAkhir,
+        xTembok + tembokThickness, tembokHeight, zAwal
+    );
+    // Sisi depan tembok
+    drawQuad(
+        xTembok, 0, zAkhir,
+        xTembok + tembokThickness, 0, zAkhir,
+        xTembok + tembokThickness, tembokHeight, zAkhir,
+        xTembok, tembokHeight, zAkhir
+    );
+    // Sisi belakang tembok
+    drawQuad(
+        xTembok, 0, zAwal,
+        xTembok + tembokThickness, 0, zAwal,
+        xTembok + tembokThickness, tembokHeight, zAwal,
+        xTembok, tembokHeight, zAwal
+    );
+    // Sisi atas tembok
+    drawQuad(
+        xTembok, tembokHeight, zAwal,
+        xTembok, tembokHeight, zAkhir,
+        xTembok + tembokThickness, tembokHeight, zAkhir,
+        xTembok + tembokThickness, tembokHeight, zAwal
+    );
+}
 
 
 // ==============================================================
@@ -291,8 +490,10 @@ void drawBuilding() {
     drawGround();
     drawWalls();
     drawKanopi();
+    drawTembokPendekDanTiangKanopi(); 
+    drawTembokSampingPendek();
     drawRoof();
-    drawBangunanSamping(); 
+    drawBangunanSamping();  
     drawBangunanDepan();
 }
 
