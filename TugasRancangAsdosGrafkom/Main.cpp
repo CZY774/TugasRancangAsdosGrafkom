@@ -40,11 +40,45 @@ void drawQuad(float x1, float y1, float z1, float x2, float y2, float z2,
     glEnd();
 }
 
-void drawWalls() {
-    glColor3f(0.96f, 0.93f, 0.82f);
-    float halfW = BUILDING_WIDTH / 2, halfL = BUILDING_LENGTH / 2;
+void drawDoors() {
+    float doorWidth = 4.0f;
+    float doorHeight = 10.0f;
+    float doorGap = 0.15f; // celah di tengah antar daun pintu
+    float halfW = BUILDING_WIDTH / 2;
+    float z = BUILDING_LENGTH / 2 + 0.01f; // sedikit keluar agar tidak z-fighting
 
+    
+    glColor3f(0.6f, 0.6f, 0.7f); // warna abu seperti atap
+    float offsetX = 7.0f; // geser kanan
+    // Pintu kiri
+    drawQuad(
+        -doorGap/2 + offsetX, 0, z,
+        -doorGap/2 - doorWidth + offsetX, 0, z,
+        -doorGap/2 - doorWidth + offsetX, doorHeight, z,
+        -doorGap/2 + offsetX, doorHeight, z
+    );
+    // Pintu kanan
+    drawQuad(
+        doorGap/2 + offsetX, 0, z,
+        doorGap/2 + doorWidth + offsetX, 0, z,
+        doorGap/2 + doorWidth + offsetX, doorHeight, z,
+        doorGap/2 + offsetX, doorHeight, z
+    );
+
+}
+
+
+void colorWalls(){
+    glColor3f(0.96f, 0.93f, 0.82f);
+}
+
+void drawWalls() {
+    colorWalls();
+    float halfW = BUILDING_WIDTH / 2, halfL = BUILDING_LENGTH / 2;
+    
     drawQuad(-halfW, 0, halfL,  halfW, 0, halfL,  halfW, WALL_HEIGHT, halfL, -halfW, WALL_HEIGHT, halfL);
+    drawDoors();
+    colorWalls();
     drawQuad(-halfW, 0, -halfL, halfW, 0, -halfL, halfW, WALL_HEIGHT, -halfL, -halfW, WALL_HEIGHT, -halfL);
     drawQuad(-halfW, 0, -halfL, -halfW, 0, halfL, -halfW, WALL_HEIGHT, halfL, -halfW, WALL_HEIGHT, -halfL);
     drawQuad(halfW, 0, -halfL,  halfW, 0, halfL,  halfW, WALL_HEIGHT, halfL,  halfW, WALL_HEIGHT, -halfL);
