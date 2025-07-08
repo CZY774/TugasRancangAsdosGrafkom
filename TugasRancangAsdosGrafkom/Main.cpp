@@ -84,12 +84,77 @@ void drawWalls() {
     drawQuad(halfW, 0, -halfL,  halfW, 0, halfL,  halfW, WALL_HEIGHT, halfL,  halfW, WALL_HEIGHT, -halfL);
 }
 
-void drawJendelaBangunanSamping(float offsetX, float offsetZ) {
+// KANOPI BANGUNAN
+void drawKanopi() {
+    float halfW = BUILDING_WIDTH / 2;
+    float zDepan = BUILDING_LENGTH / 2 + 0.5f; // sedikit keluar dari dinding depan
+    float kanopiDepth = 15.5f; // menjorok ke depan
+    float doorHeight = 25.0f;
+    float kanopiY = doorHeight / 2.0f; // tengah antara bawah dan atas pintu
+
+    glColor3f(0.6f, 0.6f, 0.7f); // warna abu seperti atap
+    drawQuad(
+        -halfW, kanopiY, zDepan,
+         halfW, kanopiY, zDepan,
+         halfW, kanopiY, zDepan + kanopiDepth,
+        -halfW, kanopiY, zDepan + kanopiDepth
+    );
+}
+
+// ==============================================================
+//                        BANGUNAN DEPAN                  
+// ==============================================================
+void drawBangunanDepan() {
+    float boxWidth = BUILDING_WIDTH / 3.0f;  // kecilin
+    float boxLength = 16.0f;
+    float boxHeight = 12.4f;
+    float halfBoxW = boxWidth / 2;
+    float halfBoxL = boxLength / 2;
+
+    // Digeser lebih kiri dari tengah (pepet ke kiri bangunan besar)
+    float offsetX = -halfBoxW - 6.5f;  // <- tambah nilai untuk geser kiri
+    float offsetZ = BUILDING_LENGTH / 2 + halfBoxL + 0.01f;
+
+    glColor3f(0.96f, 0.93f, 0.82f);
+    drawQuad(offsetX - halfBoxW, 0, offsetZ + halfBoxL,
+             offsetX + halfBoxW, 0, offsetZ + halfBoxL,
+             offsetX + halfBoxW, boxHeight, offsetZ + halfBoxL,
+             offsetX - halfBoxW, boxHeight, offsetZ + halfBoxL);
+
+    drawQuad(offsetX - halfBoxW, 0, offsetZ - halfBoxL,
+             offsetX + halfBoxW, 0, offsetZ - halfBoxL,
+             offsetX + halfBoxW, boxHeight, offsetZ - halfBoxL,
+             offsetX - halfBoxW, boxHeight, offsetZ - halfBoxL);
+
+    drawQuad(offsetX - halfBoxW, 0, offsetZ - halfBoxL,
+             offsetX - halfBoxW, 0, offsetZ + halfBoxL,
+             offsetX - halfBoxW, boxHeight, offsetZ + halfBoxL,
+             offsetX - halfBoxW, boxHeight, offsetZ - halfBoxL);
+
+    drawQuad(offsetX + halfBoxW, 0, offsetZ - halfBoxL,
+             offsetX + halfBoxW, 0, offsetZ + halfBoxL,
+             offsetX + halfBoxW, boxHeight, offsetZ + halfBoxL,
+             offsetX + halfBoxW, boxHeight, offsetZ - halfBoxL);
+
+    glColor3f(0.6f, 0.6f, 0.7f);
+    drawQuad(offsetX - halfBoxW, boxHeight, offsetZ - halfBoxL,
+             offsetX + halfBoxW, boxHeight, offsetZ - halfBoxL,
+             offsetX + halfBoxW, boxHeight, offsetZ + halfBoxL,
+             offsetX - halfBoxW, boxHeight, offsetZ + halfBoxL);
+}
+
+
+
+// ==============================================================
+//                        BANGUNAN SAMPING                  
+// ==============================================================
+
+void drawJendelaBangunanSamping(float offsetX, float offsetZ, float halfBoxL) {
     float jendelaW = 2.0f;
     float jendelaH = 6.0f;
     float gap = 0.5f;
     float jendelaY = 2.0f;
-    float jendelaZ = offsetZ + 10.0f + 0.01f; // halfBoxL = 10
+    float jendelaZ = offsetZ + halfBoxL +0.1f;
 
     float jendelaX_kiri = offsetX - (jendelaW + gap / 2);
     float jendelaX_kanan = offsetX + gap / 2;
@@ -106,8 +171,6 @@ void drawJendelaBangunanSamping(float offsetX, float offsetZ) {
              jendelaX_kanan, jendelaY + jendelaH, jendelaZ);
 }
 
-
-
 void drawBangunanSamping() {
     // Ukuran bangunan kotak
     float boxWidth = 10.0f;
@@ -122,7 +185,7 @@ void drawBangunanSamping() {
 
     float offsetZ = 8.0f; // agak masuk ke dalam
 
-    drawJendelaBangunanSamping(offsetX, offsetZ);
+    drawJendelaBangunanSamping(offsetX, offsetZ,halfBoxL);
     // Dinding (warna sama)
     glColor3f(0.96f, 0.93f, 0.82f);
     // Depan
@@ -153,6 +216,9 @@ void drawBangunanSamping() {
              offsetX + halfBoxW, boxHeight, offsetZ + halfBoxL,
              offsetX - halfBoxW, boxHeight, offsetZ + halfBoxL);
 }
+
+//
+
 
 
 void drawRoof() {
@@ -224,8 +290,10 @@ void drawGround() {
 void drawBuilding() {
     drawGround();
     drawWalls();
+    drawKanopi();
     drawRoof();
     drawBangunanSamping(); 
+    drawBangunanDepan();
 }
 
 void display() {
