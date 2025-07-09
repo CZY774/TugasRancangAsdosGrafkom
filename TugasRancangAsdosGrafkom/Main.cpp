@@ -3,6 +3,8 @@
 #include <GLUT/glut.h>
 #include <cmath>
 #include <iostream>
+#include <cstdlib>  // untuk rand() dan srand()
+#include <ctime>    // untuk time()
 
 #define BUILDING_WIDTH 40.0f
 #define BUILDING_LENGTH 60.0f
@@ -183,6 +185,49 @@ void drawBangunanDepan() {
              offsetX + halfBoxW, boxHeight, offsetZ - halfBoxL,
              offsetX + halfBoxW, boxHeight, offsetZ + halfBoxL,
              offsetX - halfBoxW, boxHeight, offsetZ + halfBoxL);
+}
+
+void drawTree(float x, float z) {
+    glPushMatrix();
+    glTranslatef(x, 0, z);
+
+    // Batang (lebih besar & tinggi)
+    glColor3f(0.55f, 0.27f, 0.07f);
+    GLUquadric* trunk = gluNewQuadric();
+    glPushMatrix();
+    glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+    gluCylinder(trunk, 0.5f, 0.5f, 7.0f, 12, 12); // diameter & tinggi batang diperbesar
+    glPopMatrix();
+    gluDeleteQuadric(trunk);
+
+    // Daun (lebih besar & tinggi)
+    glColor3f(0.0f, 0.5f, 0.0f);
+    GLUquadric* leaves = gluNewQuadric();
+    glPushMatrix();
+    glTranslatef(0.0f, 7.0f, 0.0f); // naik ke atas batang yang lebih tinggi
+    glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+    gluCylinder(leaves, 2.5f, 0.0f, 5.0f, 16, 16); // diameter & tinggi daun diperbesar
+    glPopMatrix();
+    gluDeleteQuadric(leaves);
+
+    glPopMatrix();
+}
+
+
+
+void drawRandomTrees() {
+    srand(1234); // Fixed seed agar posisi acak tapi konsisten
+
+    int treeCount = 20;
+    for (int i = 0; i < treeCount; i++) {
+        float x = (rand() % 200 - 100);  // -100 to +100
+        float z = (rand() % 200 - 100);
+        
+        // Hindari area gedung (sekitar 60x80)
+        if (x > -50 && x < 50 && z > -60 && z < 60) continue;
+
+        drawTree(x, z);
+    }
 }
 
 void drawTembokPendekDanTiangKanopi() {
@@ -385,11 +430,6 @@ void drawTembokSampingPendek() {
     );
 }
 
-
-// ==============================================================
-//                        BANGUNAN SAMPING                  
-// ==============================================================
-
 void drawJendelaBangunanSamping(float offsetX, float offsetZ, float halfBoxL) {
     float jendelaW = 2.0f;
     float jendelaH = 6.0f;
@@ -458,9 +498,40 @@ void drawBangunanSamping() {
              offsetX - halfBoxW, boxHeight, offsetZ + halfBoxL);
 }
 
-// ==============================================================
-//                        BANGUNAN BELAKANG                  
-// ==============================================================
+void drawJalan() {
+    glColor3f(0.55f, 0.55f, 0.6f); // Abu kebiruan, beda dengan warna teras
+    // Jalan melintang di depan teras, tidak masuk ke dalam teras
+    float halfW = BUILDING_WIDTH / 2;
+    float pavingY = -0.49f;
+    float zDepanTeras = BUILDING_LENGTH / 2 + 15.0f; // persis di depan paving teras
+    float pavingLebar = 20.0f; // lebar jalan (sumbu Z)
+    drawQuad(-100.0f, pavingY, zDepanTeras, 
+              BUILDING_WIDTH-2, pavingY, zDepanTeras,
+              BUILDING_WIDTH-2, pavingY, zDepanTeras + pavingLebar,
+             -100.0f, pavingY, zDepanTeras + pavingLebar);
+}
+
+// Dimodifikasi agar paving memanjang sampai menutupi area kanopi belakang
+void drawAlas() {
+    float pavingY = -0.48f;    // Sedikit di atas tanah
+    float zDepan = BUILDING_LENGTH / 2;
+    float zBelakang = -BUILDING_LENGTH / 2 - 8.5f; // extend sampai ujung kanopi belakang
+    float halfW = BUILDING_WIDTH / 2;
+    float gedungSampingWidth = 10.0f;
+    float jarakAntarBangunan = 8.0f;
+    float pavingKanan = halfW + jarakAntarBangunan + gedungSampingWidth; // kanan sampai ujung gedung kecil
+    float pavingKiri = -halfW; // kiri tetap di ujung bangunan utama
+
+    // Warna semen/concrete: abu muda keabu-abuan
+    glColor3f(0.78f, 0.78f, 0.76f);
+
+    drawQuad(
+        pavingKiri, pavingY, zBelakang,
+        pavingKanan, pavingY, zBelakang,
+        pavingKanan, pavingY, zDepan + 15.0f, // tetap sampai depan paving teras
+        pavingKiri, pavingY, zDepan + 15.0f
+    );
+}
 
 void drawKanopiBelakang() {
     float halfW = BUILDING_WIDTH / 2;
@@ -638,6 +709,9 @@ void drawGround() {
 
 void drawBuilding() {
     drawGround();
+    drawRandomTrees();  // Tambahkan ini
+    drawJalan();
+    drawAlas();
     drawWalls();
     drawKanopi();
     drawKanopiBelakang();
