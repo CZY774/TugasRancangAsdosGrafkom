@@ -858,7 +858,7 @@ void drawBadmintonCourt() {
     float courtY = -0.4f;
 
     // Lantai keramik cokelat muda
-    glColor3f(0.85f, 0.75f, 0.65f);
+    glColor3f(0.7f, 0.6f, 0.5f);
     drawQuad(courtX - courtWidth / 2, courtY, courtZ - courtLength / 2,
         courtX + courtWidth / 2, courtY, courtZ - courtLength / 2,
         courtX + courtWidth / 2, courtY, courtZ + courtLength / 2,
@@ -936,7 +936,7 @@ void drawBadmintonCourt() {
     float netHeight = 1.55f; // Tinggi net 1.55m
     float netGap = 0.2f;     // Jarak net dari lantai
     float netThickness = 0.02f;
-    float poleHeight = netHeight + netGap + 0.1f; // Tinggi tiang
+    float poleHeight = netHeight + netGap + 2.1f; // Tinggi tiang
     float poleRadius = 0.04f; // Diameter tiang ~8cm (lebih kecil)
 
     // Tiang net (kiri dan kanan)
@@ -961,7 +961,7 @@ void drawBadmintonCourt() {
     // Jaring net badminton (tidak sampai lantai)
     glColor3f(0.95f, 0.95f, 0.95f); // Warna putih
     float netTop = courtY + netGap + netHeight;
-    float netBottom = courtY + netGap;
+    float netBottom = courtY + poleHeight + netGap;
 
     // Grid vertikal net (setiap 20cm)
     for (float x = -courtWidth / 2; x <= courtWidth / 2; x += 0.2f) {
