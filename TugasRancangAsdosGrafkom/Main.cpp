@@ -146,8 +146,8 @@ void drawKanopi() {
     );
 }
 
-
 void drawBangunanDepan() {
+
     float boxWidth = BUILDING_WIDTH / 3.0f;  // kecilin
     float boxLength = 16.0f;
     float boxHeight = 12.4f;
@@ -158,27 +158,68 @@ void drawBangunanDepan() {
     float offsetX = -halfBoxW - 6.5f;  // <- tambah nilai untuk geser kiri
     float offsetZ = BUILDING_LENGTH / 2 + halfBoxL + 0.01f;
 
+    // Warna dinding
     glColor3f(0.96f, 0.93f, 0.82f);
+    
+    // Dinding depan dengan jendela
+    float windowWidth = 3.0f;
+    float windowHeight = 2.5f;
+    float windowY = 4.0f;  // tinggi jendela dari tanah
+    
+    // Gambar dinding depan kiri
     drawQuad(offsetX - halfBoxW, 0, offsetZ + halfBoxL,
+             offsetX - 1.5f, 0, offsetZ + halfBoxL,
+             offsetX - 1.5f, boxHeight, offsetZ + halfBoxL,
+             offsetX - halfBoxW, boxHeight, offsetZ + halfBoxL);
+    
+    // Gambar dinding depan kanan
+    drawQuad(offsetX + 1.5f, 0, offsetZ + halfBoxL,
              offsetX + halfBoxW, 0, offsetZ + halfBoxL,
              offsetX + halfBoxW, boxHeight, offsetZ + halfBoxL,
-             offsetX - halfBoxW, boxHeight, offsetZ + halfBoxL);
+             offsetX + 1.5f, boxHeight, offsetZ + halfBoxL);
+    
+    // Gambar dinding depan atas (di atas jendela)
+    drawQuad(offsetX - 1.5f, windowY + windowHeight, offsetZ + halfBoxL,
+             offsetX + 1.5f, windowY + windowHeight, offsetZ + halfBoxL,
+             offsetX + 1.5f, boxHeight, offsetZ + halfBoxL,
+             offsetX - 1.5f, boxHeight, offsetZ + halfBoxL);
+    
+    // Gambar dinding depan bawah (di bawah jendela)
+    drawQuad(offsetX - 1.5f, 0, offsetZ + halfBoxL,
+             offsetX + 1.5f, 0, offsetZ + halfBoxL,
+             offsetX + 1.5f, windowY, offsetZ + halfBoxL,
+             offsetX - 1.5f, windowY, offsetZ + halfBoxL);
 
+    // Gambar jendela dengan warna abu-abu terang
+    glColor3f(0.85f, 0.85f, 0.85f); // abu keputihan (warna jendela)
+    drawQuad(offsetX - 3.0f, windowY, offsetZ + halfBoxL + 0.01f,  // kiri lebih jauh
+            offsetX + 3.0f, windowY, offsetZ + halfBoxL + 0.01f,  // kanan lebih jauh
+            offsetX + 3.0f, windowY + windowHeight, offsetZ + halfBoxL + 0.01f,
+            offsetX - 3.0f, windowY + windowHeight, offsetZ + halfBoxL + 0.01f);
+    // Gambar jendela kanan
+    
+    // Kembali ke warna dinding untuk sisi lainnya
+    glColor3f(0.96f, 0.93f, 0.82f);
+    
+    // Dinding belakang
     drawQuad(offsetX - halfBoxW, 0, offsetZ - halfBoxL,
              offsetX + halfBoxW, 0, offsetZ - halfBoxL,
              offsetX + halfBoxW, boxHeight, offsetZ - halfBoxL,
              offsetX - halfBoxW, boxHeight, offsetZ - halfBoxL);
 
+    // Dinding kiri
     drawQuad(offsetX - halfBoxW, 0, offsetZ - halfBoxL,
              offsetX - halfBoxW, 0, offsetZ + halfBoxL,
              offsetX - halfBoxW, boxHeight, offsetZ + halfBoxL,
              offsetX - halfBoxW, boxHeight, offsetZ - halfBoxL);
 
+    // Dinding kanan
     drawQuad(offsetX + halfBoxW, 0, offsetZ - halfBoxL,
              offsetX + halfBoxW, 0, offsetZ + halfBoxL,
              offsetX + halfBoxW, boxHeight, offsetZ + halfBoxL,
              offsetX + halfBoxW, boxHeight, offsetZ - halfBoxL);
 
+    // Atap
     glColor3f(0.6f, 0.6f, 0.7f);
     drawQuad(offsetX - halfBoxW, boxHeight, offsetZ - halfBoxL,
              offsetX + halfBoxW, boxHeight, offsetZ - halfBoxL,
@@ -213,12 +254,11 @@ void drawTree(float x, float z) {
 }
 
 void drawRandomTrees() {
-    srand(1234); // Fixed seed agar posisi acak tapi konsisten
+    srand(4321); // Seed tetap agar acak tapi konsisten
 
-    int treeCount = 20;
+    int treeCount = 100;  // Lebih banyak pohon
     int drawn = 0;
-    int maxTry = 200;
-    int tries = 0;
+    int maxTry = 1000; // Dicukupkan agar nggak infinite loop
 
     // Area jalan
     float jalanMinX = -100.0f;
@@ -226,49 +266,50 @@ void drawRandomTrees() {
     float jalanMinZ = BUILDING_LENGTH / 2 + 15.0f;
     float jalanMaxZ = jalanMinZ + 20.0f;
 
-    // Area gedung utama
+    // Area gedung
     float gedungMinX = -50.0f, gedungMaxX = 50.0f;
     float gedungMinZ = -60.0f, gedungMaxZ = 60.0f;
 
-    // Pohon acak di luar gedung & jalan, dan tidak terlalu dekat ke gedung utama
-    float minTreeDistFromBuilding = 10.0f; // jarak minimal pohon dari gedung utama
-    while (drawn < treeCount && tries < maxTry) {
-        float x = (rand() % 200 - 100);
-        float z = (rand() % 200 - 100);
+    // Batas map
+    float areaMinX = -100.0f, areaMaxX = 100.0f;
+    float areaMinZ = -80.0f, areaMaxZ = 100.0f;
 
-        // Hindari area gedung utama (plus jarak aman)
-        if (x > gedungMinX - minTreeDistFromBuilding && x < gedungMaxX + minTreeDistFromBuilding &&
-            z > gedungMinZ - minTreeDistFromBuilding && z < gedungMaxZ + minTreeDistFromBuilding)
-        { tries++; continue; }
+    float minDistGedung = 12.0f;
 
-        // Jika X pohon sama dengan X gedung, cancel (skip)
-        if (x >= gedungMinX && x <= gedungMaxX)
-        { tries++; continue; }
+    while (drawn < treeCount && maxTry > 0) {
+        float x = areaMinX + static_cast<float>(rand()) / RAND_MAX * (areaMaxX - areaMinX);
+        float z = areaMinZ + static_cast<float>(rand()) / RAND_MAX * (areaMaxZ - areaMinZ);
 
-        // Hindari area jalan
+        // Hindari gedung + jarak aman
+        if (x > gedungMinX - minDistGedung && x < gedungMaxX + minDistGedung &&
+            z > gedungMinZ - minDistGedung && z < gedungMaxZ + minDistGedung)
+        { maxTry--; continue; }
+
+        // Hindari jalan
         if (x > jalanMinX && x < jalanMaxX && z > jalanMinZ && z < jalanMaxZ)
-        { tries++; continue; }
+        { maxTry--; continue; }
 
         drawTree(x, z);
         drawn++;
-        tries++;
+        maxTry--;
     }
 
-    // Pohon di sisi kiri jalan
-    float offsetSisi = 3.5f; // jarak dari tepi jalan
+    // Tetap gambar pohon rapi di sisi jalan
+    float offsetSisi = 3.5f;
     int pohonSisi = 7;
     float stepX = (jalanMaxX - jalanMinX) / (pohonSisi - 1);
     for (int i = 0; i < pohonSisi; ++i) {
         float x = jalanMinX + i * stepX;
-        // Jika X pohon sama dengan X gedung, cancel (skip)
         if (x >= gedungMinX && x <= gedungMaxX)
             continue;
+
         float zKiri = jalanMinZ - offsetSisi;
         float zKanan = jalanMaxZ + offsetSisi;
         drawTree(x, zKiri);
         drawTree(x, zKanan);
     }
 }
+
 
 void drawTembokPendekDanTiangKanopi() {
     float halfW = BUILDING_WIDTH / 2;
@@ -551,7 +592,6 @@ void drawJalan() {
              -100.0f, pavingY, zDepanTeras + pavingLebar);
 }
 
-// Dimodifikasi agar paving memanjang sampai menutupi area kanopi belakang
 void drawAlas() {
     float pavingY = -0.48f;    // Sedikit di atas tanah
     float zDepan = BUILDING_LENGTH / 2;
@@ -678,8 +718,6 @@ void drawKanopiBelakang() {
     );
     
 }
-
-
 
 void drawRoof() {
     glColor3f(0.6f, 0.6f, 0.7f);
