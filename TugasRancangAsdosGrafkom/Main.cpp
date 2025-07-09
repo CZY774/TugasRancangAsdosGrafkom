@@ -154,71 +154,74 @@ void drawBangunanDepan() {
     float halfBoxL = boxLength / 2;
 
     // Digeser lebih kiri dari tengah (pepet ke kiri bangunan besar)
-    float offsetX = -halfBoxW - 6.5f;  // <- tambah nilai untuk geser kiri
+    float offsetX = -halfBoxW - 6.5f;  
     float offsetZ = BUILDING_LENGTH / 2 + halfBoxL + 0.01f;
 
-    // Warna dinding
-    glColor3f(0.96f, 0.93f, 0.82f);
-    
-    // Dinding depan dengan jendela
     float windowWidth = 5.0f;
-    float windowHeight = 2.5f;
-    float windowY = 4.0f;  // tinggi jendela dari tanah
-    
-    // Gambar dinding depan kiri
-    drawQuad(offsetX - halfBoxW, 0, offsetZ + halfBoxL,
-             offsetX - 1.5f, 0, offsetZ + halfBoxL,
-             offsetX - 1.5f, boxHeight, offsetZ + halfBoxL,
-             offsetX - halfBoxW, boxHeight, offsetZ + halfBoxL);
-    
-    // Gambar dinding depan kanan
-    drawQuad(offsetX + 1.5f, 0, offsetZ + halfBoxL,
-             offsetX + halfBoxW, 0, offsetZ + halfBoxL,
-             offsetX + halfBoxW, boxHeight, offsetZ + halfBoxL,
-             offsetX + 1.5f, boxHeight, offsetZ + halfBoxL);
-    
-    // Gambar dinding depan atas (di atas jendela)
-    drawQuad(offsetX - 1.5f, windowY + windowHeight, offsetZ + halfBoxL,
-             offsetX + 1.5f, windowY + windowHeight, offsetZ + halfBoxL,
-             offsetX + 1.5f, boxHeight, offsetZ + halfBoxL,
-             offsetX - 1.5f, boxHeight, offsetZ + halfBoxL);
-    
-    // Gambar dinding depan bawah (di bawah jendela)
-    drawQuad(offsetX - 1.5f, 0, offsetZ + halfBoxL,
-             offsetX + 1.5f, 0, offsetZ + halfBoxL,
-             offsetX + 1.5f, windowY, offsetZ + halfBoxL,
-             offsetX - 1.5f, windowY, offsetZ + halfBoxL);
+    float windowHeight = 5.0f;
+    float windowY = 4.0f;
 
-    // Gambar jendela dengan warna abu-abu terang
-    glColor3f(0.85f, 0.85f, 0.85f); // abu keputihan (warna jendela)
-    drawQuad(offsetX - 3.0f, windowHeight, offsetZ + halfBoxL + 0.01f,  // kiri lebih jauh
-            offsetX + 3.0f, windowHeight, offsetZ + halfBoxL + 0.01f,  // kanan lebih jauh
-            offsetX + 3.0f, windowHeight + windowHeight, offsetZ + halfBoxL + 0.01f,
-            offsetX - 3.0f, windowHeight + windowHeight, offsetZ + halfBoxL + 0.01f);
-    // Gambar jendela kanan
-    
-    // Kembali ke warna dinding untuk sisi lainnya
+    // ========= DINDING DEPAN =========
+    glColor3f(0.96f, 0.93f, 0.82f); // Warna dinding depan
+    drawQuad(
+        offsetX - halfBoxW, 0, offsetZ + halfBoxL,
+        offsetX + halfBoxW, 0, offsetZ + halfBoxL,
+        offsetX + halfBoxW, boxHeight, offsetZ + halfBoxL,
+        offsetX - halfBoxW, boxHeight, offsetZ + halfBoxL
+    );
+
+    // ====== JENDELA KIRI DEPAN ======
+    glColor3f(0.85f, 0.85f, 0.85f);
+    drawQuad(
+        offsetX - windowWidth, windowY + windowHeight, offsetZ + halfBoxL + 0.01f,
+        offsetX - 0.5f, windowY + windowHeight, offsetZ + halfBoxL + 0.01f,
+        offsetX - 0.5f, windowY, offsetZ + halfBoxL + 0.01f,
+        offsetX - windowWidth, windowY, offsetZ + halfBoxL + 0.01f
+    );
+
+    // ====== JENDELA KANAN DEPAN ======
+    drawQuad(
+        offsetX + 0.5f, windowY + windowHeight, offsetZ + halfBoxL + 0.01f,
+        offsetX + windowWidth, windowY + windowHeight, offsetZ + halfBoxL + 0.01f,
+        offsetX + windowWidth, windowY, offsetZ + halfBoxL + 0.01f,
+        offsetX + 0.5f, windowY, offsetZ + halfBoxL + 0.01f
+    );
+
+    // ========= DINDING BELAKANG =========
     glColor3f(0.96f, 0.93f, 0.82f);
-    
-    // Dinding belakang
     drawQuad(offsetX - halfBoxW, 0, offsetZ - halfBoxL,
              offsetX + halfBoxW, 0, offsetZ - halfBoxL,
              offsetX + halfBoxW, boxHeight, offsetZ - halfBoxL,
              offsetX - halfBoxW, boxHeight, offsetZ - halfBoxL);
 
-    // Dinding kiri
+    // ========= DINDING KIRI =========
     drawQuad(offsetX - halfBoxW, 0, offsetZ - halfBoxL,
              offsetX - halfBoxW, 0, offsetZ + halfBoxL,
              offsetX - halfBoxW, boxHeight, offsetZ + halfBoxL,
              offsetX - halfBoxW, boxHeight, offsetZ - halfBoxL);
 
-    // Dinding kanan
+    // ========= DINDING KANAN =========
     drawQuad(offsetX + halfBoxW, 0, offsetZ - halfBoxL,
              offsetX + halfBoxW, 0, offsetZ + halfBoxL,
              offsetX + halfBoxW, boxHeight, offsetZ + halfBoxL,
              offsetX + halfBoxW, boxHeight, offsetZ - halfBoxL);
 
-    // Atap
+    // ===== PINTU DINDING KANAN (MENYENTUH TANAH) =====
+    glColor3f(0.6f, 0.6f, 0.7f);
+    float rightWallX = offsetX + halfBoxW + 0.01f;  // Sedikit maju biar ga nembus
+
+    float jendelaKananAtasY = windowY + windowHeight;  // Tinggi jendela (misal: 4 + 5 = 9)
+    float jendelaKananBawahY = 0.0f;                   // Menyentuh tanah
+
+    drawQuad(
+        rightWallX, jendelaKananAtasY, offsetZ - 3.0f,   // Kiri atas
+        rightWallX, jendelaKananAtasY, offsetZ + 3.0f,   // Kanan atas
+        rightWallX, jendelaKananBawahY, offsetZ + 3.0f,  // Kanan bawah (tanah)
+        rightWallX, jendelaKananBawahY, offsetZ - 3.0f   // Kiri bawah (tanah)
+    );
+
+
+    // ========= ATAP =========
     glColor3f(0.6f, 0.6f, 0.7f);
     drawQuad(offsetX - halfBoxW, boxHeight, offsetZ - halfBoxL,
              offsetX + halfBoxW, boxHeight, offsetZ - halfBoxL,
