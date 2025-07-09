@@ -28,6 +28,10 @@ void init() {
     glEnable(GL_COLOR_MATERIAL);
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
+    // Tambahkan ini di init()
+    GLfloat global_ambient[] = { 0.1f, 0.1f, 0.1f, 0.8f };
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
+
     // Atur posisi dan parameter light yang lebih baik
     GLfloat light_position[] = {30.0f, 50.0f, 30.0f, 1.0f};
     GLfloat light_ambient[] = {0.4f, 0.4f, 0.4f, 1.0f};
@@ -89,30 +93,38 @@ void drawQuad(float x1, float y1, float z1,
 }
 
 void drawDoors() {
-    float doorWidth = 4.0f;
+    float doorWidth = 3.8f; // Lebar per daun pintu dikurangi agar muat 4
     float doorHeight = 10.0f;
-    float doorGap = 0.15f; // celah di tengah antar daun pintu
-    float halfW = BUILDING_WIDTH / 2;
-    float z = BUILDING_LENGTH / 2 + 0.01f; // sedikit keluar agar tidak z-fighting
+    float doorGap = 0.1f; // Celah tipis antar pintu (10cm)
+    float z = BUILDING_LENGTH / 2 + 0.01f;
 
-    
-    glColor3f(0.6f, 0.6f, 0.7f); // warna abu seperti atap
-    float offsetX = 7.0f; // geser kanan
-    // Pintu kiri
-    drawQuad(
-        -doorGap/2 + offsetX, 0, z,
-        -doorGap/2 - doorWidth + offsetX, 0, z,
-        -doorGap/2 - doorWidth + offsetX, doorHeight, z,
-        -doorGap/2 + offsetX, doorHeight, z
-    );
-    // Pintu kanan
-    drawQuad(
-        doorGap/2 + offsetX, 0, z,
-        doorGap/2 + doorWidth + offsetX, 0, z,
-        doorGap/2 + doorWidth + offsetX, doorHeight, z,
-        doorGap/2 + offsetX, doorHeight, z
-    );
+    glColor3f(0.6f, 0.6f, 0.7f); // Warna abu-abu metalik
 
+    // Posisi awal (ujung kiri blok pintu)
+    float horizontalOffset = 7.0f;
+    float startX = -((4 * doorWidth) + (3 * doorGap)) / 2 + horizontalOffset; // Hitung posisi tengah
+
+    // Gambar 4 pintu berjejer rapat
+    for (int i = 0; i < 4; i++) {
+        float xPos = startX + i * (doorWidth + doorGap);
+
+        drawQuad(xPos, 0, z,
+            xPos + doorWidth, 0, z,
+            xPos + doorWidth, doorHeight, z,
+            xPos, doorHeight, z);
+    }
+
+    // Tambahkan gagang pintu
+    glColor3f(0.3f, 0.3f, 0.3f); // Warna gagang
+    for (int i = 0; i < 4; i++) {
+        float xPos = startX + i * (doorWidth + doorGap);
+
+        // Gagang vertikal di setiap pintu
+        drawQuad(xPos + doorWidth - 0.2f, doorHeight * 0.4f, z + 0.02f,
+            xPos + doorWidth - 0.1f, doorHeight * 0.4f, z + 0.02f,
+            xPos + doorWidth - 0.1f, doorHeight * 0.6f, z + 0.02f,
+            xPos + doorWidth - 0.2f, doorHeight * 0.6f, z + 0.02f);
+    }
 }
 
 
@@ -988,17 +1000,39 @@ void drawBadmintonCourt() {
 }
 
 void drawLights() {
-    // Parameter lampu yang lebih natural
-    GLfloat light_ambient[] = { 0.05f, 0.05f, 0.05f, 1.0f };  // Ambient sangat redup
-    GLfloat light_diffuse[] = { 0.7f, 0.7f, 0.65f, 1.0f };    // Diffuse kuning lembut
-    GLfloat light_specular[] = { 0.5f, 0.5f, 0.5f, 1.0f };    // Specular tidak terlalu terang
+    // Nonaktifkan lighting sementara untuk menggambar visual lampu
+    glDisable(GL_LIGHTING);
+    glColor3f(0.9f, 0.9f, 0.8f); // Warna visual lampu
+
+    // Gambar visual lampu kecil (hanya bentuknya, tanpa efek lighting)
+    for (int i = 0; i < 4; i++) {
+        float zPos = -BUILDING_LENGTH / 2 + (i + 1) * (BUILDING_LENGTH / 5);
+
+        // Lampu kiri
+        glPushMatrix();
+        glTranslatef(-BUILDING_WIDTH / 2 + 3.0f, WALL_HEIGHT * 0.7f, zPos);
+        glutSolidSphere(0.15f, 10, 10);
+        glPopMatrix();
+
+        // Lampu kanan
+        glPushMatrix();
+        glTranslatef(BUILDING_WIDTH / 2 - 3.0f, WALL_HEIGHT * 0.7f, zPos);
+        glutSolidSphere(0.15f, 10, 10);
+        glPopMatrix();
+    }
+    glEnable(GL_LIGHTING);
+
+    // Parameter cahaya yang lebih natural
+    GLfloat light_ambient[] = { 0.05f, 0.05f, 0.05f, 1.0f };
+    GLfloat light_diffuse[] = { 0.4f, 0.4f, 0.35f, 1.0f };  // Lebih redup
+    GLfloat light_specular[] = { 0.3f, 0.3f, 0.3f, 1.0f };  // Specular lebih redup
 
     // Attenuation untuk mengurangi intensitas
     float constant_atten = 1.0f;
-    float linear_atten = 0.05f;
-    float quadratic_atten = 0.01f;
+    float linear_atten = 0.1f;    // Lebih besar untuk reduksi lebih cepat
+    float quadratic_atten = 0.02f;
 
-    // Lampu sisi kiri (4 buah)
+    // Lampu sisi kiri (4 buah) - intensitas dikurangi
     for (int i = 0; i < 4; i++) {
         GLenum light_id = GL_LIGHT1 + i;
         float zPos = -BUILDING_LENGTH / 2 + (i + 1) * (BUILDING_LENGTH / 5);
@@ -1012,16 +1046,9 @@ void drawLights() {
         glLightf(light_id, GL_CONSTANT_ATTENUATION, constant_atten);
         glLightf(light_id, GL_LINEAR_ATTENUATION, linear_atten);
         glLightf(light_id, GL_QUADRATIC_ATTENUATION, quadratic_atten);
-
-        // Visual lampu kecil
-        glColor3f(0.9f, 0.9f, 0.8f);
-        glPushMatrix();
-        glTranslatef(light_position[0], light_position[1], light_position[2]);
-        glutSolidSphere(0.15f, 10, 10); // Ukuran diperkecil
-        glPopMatrix();
     }
 
-    // Lampu sisi kanan (4 buah)
+    // Lampu sisi kanan (4 buah) - intensitas dikurangi
     for (int i = 0; i < 4; i++) {
         GLenum light_id = GL_LIGHT5 + i;
         float zPos = -BUILDING_LENGTH / 2 + (i + 1) * (BUILDING_LENGTH / 5);
@@ -1031,7 +1058,7 @@ void drawLights() {
         glLightfv(light_id, GL_POSITION, light_position);
         glLightfv(light_id, GL_AMBIENT, light_ambient);
         glLightfv(light_id, GL_DIFFUSE, light_diffuse);
-        glLightf(light_id, GL_SPOT_EXPONENT, 0.5f); // Soft lighting
+        glLightfv(light_id, GL_SPECULAR, light_specular);
         glLightf(light_id, GL_CONSTANT_ATTENUATION, constant_atten);
         glLightf(light_id, GL_LINEAR_ATTENUATION, linear_atten);
         glLightf(light_id, GL_QUADRATIC_ATTENUATION, quadratic_atten);
