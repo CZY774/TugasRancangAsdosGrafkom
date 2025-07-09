@@ -147,60 +147,51 @@ void drawKanopi() {
 }
 
 void drawBangunanDepan() {
-
-    float boxWidth = BUILDING_WIDTH / 3.0f;  // kecilin
+    float boxWidth = BUILDING_WIDTH / 3.0f;
     float boxLength = 16.0f;
     float boxHeight = 12.4f;
     float halfBoxW = boxWidth / 2;
     float halfBoxL = boxLength / 2;
 
-    // Digeser lebih kiri dari tengah (pepet ke kiri bangunan besar)
-    float offsetX = -halfBoxW - 6.5f;  // <- tambah nilai untuk geser kiri
+    float offsetX = -halfBoxW - 6.5f;
     float offsetZ = BUILDING_LENGTH / 2 + halfBoxL + 0.01f;
 
-    // Warna dinding
+    // Warna dinding utama
     glColor3f(0.96f, 0.93f, 0.82f);
-    
-    // Dinding depan dengan jendela
-    float windowWidth = 3.0f;
-    float windowHeight = 2.5f;
-    float windowY = 4.0f;  // tinggi jendela dari tanah
-    
-    // Gambar dinding depan kiri
+
+    // Dinding depan penuh (tidak ada lubang)
     drawQuad(offsetX - halfBoxW, 0, offsetZ + halfBoxL,
-             offsetX - 1.5f, 0, offsetZ + halfBoxL,
-             offsetX - 1.5f, boxHeight, offsetZ + halfBoxL,
-             offsetX - halfBoxW, boxHeight, offsetZ + halfBoxL);
-    
-    // Gambar dinding depan kanan
-    drawQuad(offsetX + 1.5f, 0, offsetZ + halfBoxL,
              offsetX + halfBoxW, 0, offsetZ + halfBoxL,
              offsetX + halfBoxW, boxHeight, offsetZ + halfBoxL,
-             offsetX + 1.5f, boxHeight, offsetZ + halfBoxL);
-    
-    // Gambar dinding depan atas (di atas jendela)
-    drawQuad(offsetX - 1.5f, windowY + windowHeight, offsetZ + halfBoxL,
-             offsetX + 1.5f, windowY + windowHeight, offsetZ + halfBoxL,
-             offsetX + 1.5f, boxHeight, offsetZ + halfBoxL,
-             offsetX - 1.5f, boxHeight, offsetZ + halfBoxL);
-    
-    // Gambar dinding depan bawah (di bawah jendela)
-    drawQuad(offsetX - 1.5f, 0, offsetZ + halfBoxL,
-             offsetX + 1.5f, 0, offsetZ + halfBoxL,
-             offsetX + 1.5f, windowY, offsetZ + halfBoxL,
-             offsetX - 1.5f, windowY, offsetZ + halfBoxL);
+             offsetX - halfBoxW, boxHeight, offsetZ + halfBoxL);
 
-    // Gambar jendela dengan warna abu-abu terang
-    glColor3f(0.85f, 0.85f, 0.85f); // abu keputihan (warna jendela)
-    drawQuad(offsetX - 3.0f, windowY, offsetZ + halfBoxL + 0.01f,  // kiri lebih jauh
-            offsetX + 3.0f, windowY, offsetZ + halfBoxL + 0.01f,  // kanan lebih jauh
-            offsetX + 3.0f, windowY + windowHeight, offsetZ + halfBoxL + 0.01f,
-            offsetX - 3.0f, windowY + windowHeight, offsetZ + halfBoxL + 0.01f);
-    // Gambar jendela kanan
-    
-    // Kembali ke warna dinding untuk sisi lainnya
+    // Warna jendela
+    glColor3f(0.75f, 0.75f, 0.75f);  // abu terang
+
+    // Ukuran & posisi jendela
+    float windowWidth = 4.0f;       // lebih sempit
+    float windowHeight = 6.0f;      // lebih tinggi
+    float windowY = 4.0f;
+    float jendelaLebar = windowWidth / 2.0f;
+    float jarakAntarJendela = 3.0f;
+
+    // Jendela kiri
+    float leftX = offsetX - jarakAntarJendela;
+    drawQuad(leftX - jendelaLebar, windowY, offsetZ + halfBoxL + 0.01f,
+             leftX + jendelaLebar, windowY, offsetZ + halfBoxL + 0.01f,
+             leftX + jendelaLebar, windowY + windowHeight, offsetZ + halfBoxL + 0.01f,
+             leftX - jendelaLebar, windowY + windowHeight, offsetZ + halfBoxL + 0.01f);
+
+    // Jendela kanan
+    float rightX = offsetX + jarakAntarJendela;
+    drawQuad(rightX - jendelaLebar, windowY, offsetZ + halfBoxL + 0.01f,
+             rightX + jendelaLebar, windowY, offsetZ + halfBoxL + 0.01f,
+             rightX + jendelaLebar, windowY + windowHeight, offsetZ + halfBoxL + 0.01f,
+             rightX - jendelaLebar, windowY + windowHeight, offsetZ + halfBoxL + 0.01f);
+
+    // Kembali ke warna dinding
     glColor3f(0.96f, 0.93f, 0.82f);
-    
+
     // Dinding belakang
     drawQuad(offsetX - halfBoxW, 0, offsetZ - halfBoxL,
              offsetX + halfBoxW, 0, offsetZ - halfBoxL,
@@ -226,6 +217,7 @@ void drawBangunanDepan() {
              offsetX + halfBoxW, boxHeight, offsetZ + halfBoxL,
              offsetX - halfBoxW, boxHeight, offsetZ + halfBoxL);
 }
+
 
 void drawTree(float x, float z) {
     glPushMatrix();
