@@ -3,8 +3,9 @@
 #include <OpenGL/gl.h>
 #include <GLUT/glut.h>
 #else
-#include <GL/gl.h>
-#include <GL/glut.h>
+//#include <GL/gl.h>
+//#include <GL/glut.h>
+#include <GL/freeglut.h>
 #endif
 #include <cmath>
 #include <iostream>
@@ -1194,6 +1195,131 @@ void drawGrassPatches() {
     }
 }
 
+void drawPanggungIndoor() {
+    float halfL = BUILDING_LENGTH / 2;
+    float halfW = BUILDING_WIDTH / 2;
+
+    // Parameter panggung INDOOR (revisi)
+    float panggungPanjang = BUILDING_WIDTH;  // 100% lebar gedung 
+    float panggungLebar = 6.0f;                    // Lebar cukup untuk panggung
+    float panggungTinggi = 2.0f;                   // Tinggi 2 meter dari lantai (revisi)
+    float panggungZ = -halfL + 10.0f;              // 10m dari dinding belakang
+
+    // Warna panggung (kayu lapisan teak lebih gelap)
+    glColor3f(0.5f, 0.4f, 0.25f);
+
+    // Alas panggung (segiempat besar)
+    drawQuad(-panggungPanjang / 2, 0, panggungZ,
+        panggungPanjang / 2, 0, panggungZ,
+        panggungPanjang / 2, 0, panggungZ - panggungLebar,
+        -panggungPanjang / 2, 0, panggungZ - panggungLebar);
+
+    // Sisi vertikal panggung (semua sisi)
+    for (int i = 0; i < 4; i++) {
+        float x1, z1, x2, z2;
+
+        if (i == 0) { // Depan
+            x1 = -panggungPanjang / 2; z1 = panggungZ;
+            x2 = panggungPanjang / 2;  z2 = panggungZ;
+        }
+        else if (i == 1) { // Belakang
+            x1 = -panggungPanjang / 2; z1 = panggungZ - panggungLebar;
+            x2 = panggungPanjang / 2;  z2 = panggungZ - panggungLebar;
+        }
+        else if (i == 2) { // Kiri
+            x1 = -panggungPanjang / 2; z1 = panggungZ;
+            x2 = -panggungPanjang / 2; z2 = panggungZ - panggungLebar;
+        }
+        else { // Kanan
+            x1 = panggungPanjang / 2; z1 = panggungZ;
+            x2 = panggungPanjang / 2; z2 = panggungZ - panggungLebar;
+        }
+
+        drawQuad(x1, 0, z1,
+            x2, 0, z2,
+            x2, panggungTinggi, z2,
+            x1, panggungTinggi, z1);
+    }
+
+    // Dek panggung (lantai atas)
+    drawQuad(-panggungPanjang / 2, panggungTinggi, panggungZ,
+        panggungPanjang / 2, panggungTinggi, panggungZ,
+        panggungPanjang / 2, panggungTinggi, panggungZ - panggungLebar,
+        -panggungPanjang / 2, panggungTinggi, panggungZ - panggungLebar);
+
+    // Pilar penyangga struktur atap (revisi lebih besar)
+    float pilarTinggi = 7.0f;       // Tinggi total 5m (2m panggung + 3m pilar)
+    float pilarLebar = 0.5f;        // Lebar pilar diperbesar
+    float jarakPilar = panggungPanjang * 0.6f; // Jarak disesuaikan
+
+    // Warna pilar (beton ekspos lebih gelap)
+    glColor3f(0.7f, 0.7f, 0.7f);
+
+    // Pilar kiri dan kanan
+    for (int i = 0; i < 2; i++) {
+        float xPos = (i == 0) ? -jarakPilar / 2 : jarakPilar / 2;
+
+        // Badan pilar
+        drawQuad(xPos - pilarLebar / 2, panggungTinggi, panggungZ - panggungLebar / 2,
+            xPos + pilarLebar / 2, panggungTinggi, panggungZ - panggungLebar / 2,
+            xPos + pilarLebar / 2, panggungTinggi + pilarTinggi, panggungZ - panggungLebar / 2,
+            xPos - pilarLebar / 2, panggungTinggi + pilarTinggi, panggungZ - panggungLebar / 2);
+
+        // Penopang tambahan (cross beam)
+        if (i == 0) { // Hanya gambar untuk pilar kiri sebagai contoh
+            glColor3f(0.6f, 0.6f, 0.6f);
+            drawQuad(xPos - pilarLebar / 2, panggungTinggi + 1.0f, panggungZ - panggungLebar / 2,
+                xPos - pilarLebar / 2, panggungTinggi + 1.5f, panggungZ - panggungLebar / 2 - 1.0f,
+                xPos - pilarLebar / 2, panggungTinggi + 1.5f, panggungZ - panggungLebar / 2 - 1.5f,
+                xPos - pilarLebar / 2, panggungTinggi + 1.0f, panggungZ - panggungLebar / 2 - 0.5f);
+        }
+    }
+
+    // Plat penyangga atap (revisi lebih besar)
+    float platPanjang = panggungPanjang * 0.8f;
+    float platLebar = 4.0f;
+    float platTebal = 0.4f;
+
+    glColor3f(0.65f, 0.65f, 0.7f); // Warna beton lebih gelap
+
+    // Plat atas (horizontal)
+    drawQuad(-platPanjang / 2, panggungTinggi + pilarTinggi, panggungZ - panggungLebar / 2,
+        platPanjang / 2, panggungTinggi + pilarTinggi, panggungZ - panggungLebar / 2,
+        platPanjang / 2, panggungTinggi + pilarTinggi, panggungZ - panggungLebar / 2 - platLebar,
+        -platPanjang / 2, panggungTinggi + pilarTinggi, panggungZ - panggungLebar / 2 - platLebar);
+
+    // Sisi-sisi plat
+    for (int i = 0; i < 4; i++) {
+        float x1, z1, x2, z2, y2;
+
+        if (i == 0) { // Depan
+            x1 = -platPanjang / 2; z1 = panggungZ - panggungLebar / 2;
+            x2 = platPanjang / 2;  z2 = panggungZ - panggungLebar / 2;
+            y2 = panggungTinggi + pilarTinggi - platTebal;
+        }
+        else if (i == 1) { // Belakang
+            x1 = -platPanjang / 2; z1 = panggungZ - panggungLebar / 2 - platLebar;
+            x2 = platPanjang / 2;  z2 = panggungZ - panggungLebar / 2 - platLebar;
+            y2 = panggungTinggi + pilarTinggi - platTebal;
+        }
+        else if (i == 2) { // Kiri
+            x1 = -platPanjang / 2; z1 = panggungZ - panggungLebar / 2;
+            x2 = -platPanjang / 2; z2 = panggungZ - panggungLebar / 2 - platLebar;
+            y2 = panggungTinggi + pilarTinggi - platTebal;
+        }
+        else { // Kanan
+            x1 = platPanjang / 2; z1 = panggungZ - panggungLebar / 2;
+            x2 = platPanjang / 2; z2 = panggungZ - panggungLebar / 2 - platLebar;
+            y2 = panggungTinggi + pilarTinggi - platTebal;
+        }
+
+        drawQuad(x1, panggungTinggi + pilarTinggi, z1,
+            x2, panggungTinggi + pilarTinggi, z2,
+            x2, y2, z2,
+            x1, y2, z1);
+    }
+}
+
 void drawBuilding() {
     drawGround();
     drawGrassPatches();
@@ -1210,6 +1336,7 @@ void drawBuilding() {
     drawBangunanDepan();
     drawLights();
     drawBadmintonCourt();
+    drawPanggungIndoor();
 }
 
 void display() {
