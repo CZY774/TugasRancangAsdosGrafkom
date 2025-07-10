@@ -1,7 +1,11 @@
-//#include <OpenGL/gl.h>
-//#include <OpenGL/glu.h>
-//#include <GLUT/glut.h>
-#include <GL/freeglut.h>
+#ifdef __APPLE__
+#define GL_SILENCE_DEPRECATION
+#include <OpenGL/gl.h>
+#include <GLUT/glut.h>
+#else
+#include <GL/gl.h>
+#include <GL/glut.h>
+#endif
 #include <cmath>
 #include <iostream>
 #include <cstdlib>  // untuk rand() dan srand()
@@ -168,18 +172,57 @@ void drawWalls() {
     float totalWidth = numWindows * jendelaSize + (numWindows - 1) * 1.0f;
     float startX = -totalWidth / 2.0f;
 
-    // Gambar jendela berjejer di sisi luar
+    float tebalJendela = 1.0f; // ketebalan jendela
+
     for (int i = 0; i < numWindows; ++i) {
         float x1 = startX + i * (jendelaSize + 1.0f);
         float x2 = x1 + jendelaSize;
         float y1 = baseY;
         float y2 = baseY + jendelaSize;
 
+        // Sisi luar (belakang)
+        glColor3f(0.85f, 0.85f, 0.85f);
         drawQuad(
             x1, y1, zBack,
             x2, y1, zBack,
             x2, y2, zBack,
             x1, y2, zBack
+        );
+        // Sisi dalam (menghadap ke dalam ruangan)
+        glColor3f(0.85f, 0.85f, 0.85f);
+        drawQuad(
+            x1, y1, zBack + tebalJendela,
+            x2, y1, zBack + tebalJendela,
+            x2, y2, zBack + tebalJendela,
+            x1, y2, zBack + tebalJendela
+        );
+        // Sisi atas
+        drawQuad(
+            x1, y2, zBack,
+            x2, y2, zBack,
+            x2, y2, zBack + tebalJendela,
+            x1, y2, zBack + tebalJendela
+        );
+        // Sisi bawah
+        drawQuad(
+            x1, y1, zBack,
+            x2, y1, zBack,
+            x2, y1, zBack + tebalJendela,
+            x1, y1, zBack + tebalJendela
+        );
+        // Sisi kiri
+        drawQuad(
+            x1, y1, zBack,
+            x1, y2, zBack,
+            x1, y2, zBack + tebalJendela,
+            x1, y1, zBack + tebalJendela
+        );
+        // Sisi kanan
+        drawQuad(
+            x2, y1, zBack,
+            x2, y2, zBack,
+            x2, y2, zBack + tebalJendela,
+            x2, y1, zBack + tebalJendela
         );
     }
 
@@ -189,7 +232,23 @@ void drawWalls() {
 
     // Dinding kanan
     colorWalls();
-    drawQuad(halfW, 0, -halfL, halfW, 0, halfL, halfW, WALL_HEIGHT, halfL, halfW, WALL_HEIGHT, -halfL);
+    drawQuad(halfW, 0, -halfL,  halfW, 0, halfL,  halfW, WALL_HEIGHT, halfL,  halfW, WALL_HEIGHT, -halfL);
+
+    // ===== PINTU DI DINDING KANAN =====
+    float pintuWidth = 4.0f;
+    float pintuHeight = 7.0f;
+    float pintuZ = 23.0f; // posisi tengah dinding kanan
+    float pintuY = 0.0f;
+
+    glColor3f(0.5f, 0.5f, 0.6f); // warna pintu (abu gelap)
+    drawQuad(
+        halfW + 0.01f, pintuY, pintuZ - pintuWidth/2,
+        halfW + 0.01f, pintuY, pintuZ + pintuWidth/2,
+        halfW + 0.01f, pintuY + pintuHeight, pintuZ + pintuWidth/2,
+        halfW + 0.01f, pintuY + pintuHeight, pintuZ - pintuWidth/2
+    );
+
+
 
     // Pintu (di depan)
     drawDoors();
@@ -1073,9 +1132,72 @@ void drawLights() {
     }
 }
 
+
+// gambar rumput
+void drawGrassPatch(float x, float z) {
+    glPushMatrix();
+    glTranslatef(x, -0.48f, z); // letakkan di permukaan tanah
+    glColor3f(0.2f, 0.8f, 0.2f); // hijau terang
+
+    // Gambar beberapa "helai" rumput (segitiga tipis)
+    for (int i = 0; i < 5; ++i) {
+        float angle = i * 72.0f; // 5 helai, menyebar
+        glPushMatrix();
+        glRotatef(angle, 0, 1, 0);
+        glBegin(GL_TRIANGLES);
+        glVertex3f(0.0f, 0.0f, 0.0f);
+        glVertex3f(0.1f, 0.0f, 0.0f);
+        // glVertex3f(0.05f, 0.5f + 0.2f * (rand() % 100) / 100.0f, 0.0f);
+        glVertex3f(0.05f, 1.0f + 0.3f * (rand() % 100) / 100.0f, 0.0f);
+        glEnd();
+        glPopMatrix();
+    }
+    glPopMatrix();
+}
+
+// Fungsi untuk menggambar beberapa patch rumput di halaman depan
+void drawGrassPatches() {
+    // Area halaman luas (area pohon acak)
+    float areaMinX = -100.0f, areaMaxX = 100.0f;
+    float areaMinZ = -80.0f, areaMaxZ = 100.0f;
+
+    // Area gedung dan jalan untuk dihindari
+    float gedungMinX = -50.0f, gedungMaxX = 50.0f;
+    float gedungMinZ = -60.0f, gedungMaxZ = 60.0f;
+    float minDistGedung = 12.0f;
+
+    float jalanMinX = -100.0f;
+    float jalanMaxX = BUILDING_WIDTH - 2;
+    float jalanMinZ = BUILDING_LENGTH / 2 + 15.0f;
+    float jalanMaxZ = jalanMinZ + 20.0f;
+
+    srand(5678); // Seed tetap agar posisi konsisten
+    int count = 0, maxTry = 1000;
+    int grassCount = 60; // jumlah patch rumput
+
+    while (count < grassCount && maxTry > 0) {
+        float x = areaMinX + static_cast<float>(rand()) / RAND_MAX * (areaMaxX - areaMinX);
+        float z = areaMinZ + static_cast<float>(rand()) / RAND_MAX * (areaMaxZ - areaMinZ);
+
+        // Hindari area gedung + jarak aman
+        if (x > gedungMinX - minDistGedung && x < gedungMaxX + minDistGedung &&
+            z > gedungMinZ - minDistGedung && z < gedungMaxZ + minDistGedung)
+        { maxTry--; continue; }
+
+        // Hindari area jalan
+        if (x > jalanMinX && x < jalanMaxX && z > jalanMinZ && z < jalanMaxZ)
+        { maxTry--; continue; }
+
+        drawGrassPatch(x, z);
+        count++;
+        maxTry--;
+    }
+}
+
 void drawBuilding() {
     drawGround();
-    drawRandomTrees();  // Tambahkan ini
+    drawGrassPatches();
+    drawRandomTrees();  
     drawJalan();
     drawAlas();
     drawWalls();
