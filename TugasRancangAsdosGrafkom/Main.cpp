@@ -140,6 +140,28 @@ void drawDoors() {
     }
 }
 
+void drawKetela(float x, float z) {
+    float yBase = 0.01f;
+    float batangTinggi = 1.2f;
+    float batangRadius = 0.2f;
+
+    // Batang (coklat)
+    glColor3f(0.4f, 0.2f, 0.0f);
+    glPushMatrix();
+        glTranslatef(x, yBase, z);
+        glRotatef(-90, 1, 0, 0); // agar silinder berdiri
+        GLUquadric* quad = gluNewQuadric();
+        gluCylinder(quad, batangRadius, batangRadius * 0.8, batangTinggi, 10, 10);
+        gluDeleteQuadric(quad);
+    glPopMatrix();
+
+    // Daun (hijau)
+    glColor3f(0.0f, 0.6f, 0.2f);
+    glPushMatrix();
+        glTranslatef(x, yBase + batangTinggi, z);
+        glutSolidSphere(0.4f, 10, 10);
+    glPopMatrix();
+}
 
 void colorWalls(){
     glColor3f(0.96f, 0.93f, 0.82f);
@@ -315,30 +337,113 @@ void drawWalls() {
 }
 
 
-void drawJalanSampingKiri() {
-    glColor3f(0.55f, 0.55f, 0.6f);
-
-    float jalanLebar = 15.0f;
-    float jalanY = 0.01f;
-    float offset = 2.0f;
-
+void drawLahanSampingKiri() {
     float halfW = BUILDING_WIDTH / 2.0f;
+    float halfL = BUILDING_LENGTH / 2.0f;
+    float offset = 2.0f;            // Jarak antar bangunan dan lahan
+    float lahanWidth = 40.0f;       // Lebar lahan samping
+    float y = 0.01f;                // Posisi Y sedikit di atas tanah
 
-    float xKiriDalam = -halfW - offset;
-    float xKiriLuar  = xKiriDalam - jalanLebar;
+    float xKiri = -halfW - offset;  // Posisi awal lahan kiri
+    float xLuar = xKiri - lahanWidth;
 
-    // Panjang custom
-    float zAwal = -BUILDING_LENGTH / 2.0f - 25.0f; // lebih mundur
-    float zAkhir = BUILDING_LENGTH / 2.0f + 35.0f; // lebih maju
+    float zDepan = halfL;
+    float zBelakang = -halfL;
+    float zTengah = 0.0f;           // Pembagi lahan depan & belakang
 
-    drawQuad(
-        xKiriLuar, jalanY, zAwal,
-        xKiriDalam, jalanY, zAwal,
-        xKiriDalam, jalanY, zAkhir,
-        xKiriLuar, jalanY, zAkhir
-    );
+    // Lahan ketela (depan)
+    glColor3f(0.55f, 0.27f, 0.07f); // Coklat tanah
+    drawQuad(xLuar, y, zTengah, xKiri, y, zTengah, xKiri, y, zDepan, xLuar, y, zDepan);
+
+    // Lahan rumah (belakang)
+    glColor3f(0.8f, 0.8f, 0.6f);    // Krem terang, lahan rumah
+    drawQuad(xLuar, y, zBelakang, xKiri, y, zBelakang, xKiri, y, zTengah, xLuar, y, zTengah);
+
+    // Garis batas pemisah lahan
+    glColor3f(0.0f, 0.0f, 0.0f);    // Hitam
+    glLineWidth(3.0f);
+    glBegin(GL_LINES);
+        glVertex3f(xLuar, y + 0.01f, zTengah);
+        glVertex3f(xKiri, y + 0.01f, zTengah);
+    glEnd();
+
+    for (float zx = zTengah + 2.0f; zx < zDepan - 2.0f; zx += 4.5f) {
+        for (float xx = xLuar + 4.0f; xx < xKiri - 4.0f; xx += 4.5f) {
+            drawKetela(xx, zx);
+        }
+    }
 }
 
+
+void drawRumahSampingKiri() {
+    float halfW = BUILDING_WIDTH / 2.0f;
+    float halfL = BUILDING_LENGTH / 2.0f;
+
+    float offset = 5.0f;              // jarak dari bangunan utama
+    float lahanWidth = 40.0f;
+    float zTengah = 0.0f;
+    float zBelakang = -halfL;
+
+    float xKiri = -halfW - offset;
+    float xLuar = xKiri - lahanWidth;
+
+    float padding = 4.0f;  // agar rumah tidak nempel tepi lahan
+    float x1 = xLuar + padding;
+    float x2 = xKiri - padding;
+    float z1 = zBelakang + padding;
+    float z2 = zTengah - padding;
+
+    float y1 = 0.01f;
+    float y2 = y1 + 10.0f;   // tinggi rumah
+
+    // Dinding rumah (warna krem)
+    glColor3f(0.85f, 0.8f, 0.6f);
+    // Depan
+    drawQuad(x1, y1, z2, x2, y1, z2, x2, y2, z2, x1, y2, z2);
+    // Belakang
+    drawQuad(x1, y1, z1, x2, y1, z1, x2, y2, z1, x1, y2, z1);
+    // Kiri
+    drawQuad(x1, y1, z1, x1, y1, z2, x1, y2, z2, x1, y2, z1);
+    // Kanan
+    drawQuad(x2, y1, z1, x2, y1, z2, x2, y2, z2, x2, y2, z1);
+    // Atas (langit-langit rumah)
+    drawQuad(x1, y2, z1, x2, y2, z1, x2, y2, z2, x1, y2, z2);
+
+    // Atap pelana
+    float yAtap = y2 + 4.0f; // tinggi atap
+    float xTengah = (x1 + x2) / 2.0f;
+
+    glColor3f(0.6f, 0.2f, 0.2f);  // warna merah bata
+
+    // Sisi kiri atap (miring)
+    glBegin(GL_TRIANGLES);
+        glVertex3f(x1, y2, z1);
+        glVertex3f(x2, y2, z1);
+        glVertex3f(xTengah, yAtap, z1);
+    glEnd();
+
+    glBegin(GL_TRIANGLES);
+        glVertex3f(x1, y2, z2);
+        glVertex3f(x2, y2, z2);
+        glVertex3f(xTengah, yAtap, z2);
+    glEnd();
+
+    // Sisi segitiga kiri
+    glBegin(GL_QUADS);
+        glVertex3f(x1, y2, z1);
+        glVertex3f(x1, y2, z2);
+        glVertex3f(xTengah, yAtap, z2);
+        glVertex3f(xTengah, yAtap, z1);
+    glEnd();
+
+    // Sisi segitiga kanan
+    glBegin(GL_QUADS);
+        glVertex3f(x2, y2, z1);
+        glVertex3f(x2, y2, z2);
+        glVertex3f(xTengah, yAtap, z2);
+        glVertex3f(xTengah, yAtap, z1);
+    glEnd();
+}
 
 
 
@@ -1673,6 +1778,8 @@ void panggilBurung(){
 
 }
 
+
+
 void drawBuilding() {
     drawGround();
     drawGrassPatches();
@@ -1680,7 +1787,8 @@ void drawBuilding() {
     drawJalan();
     drawAlas();
     drawWalls();
-    drawJalanSampingKiri();
+    drawLahanSampingKiri();
+    drawRumahSampingKiri();
     drawKanopi();
     drawKanopiBelakang();
     drawJalanDepanKanopiBelakang(15.0f,150.0f);
