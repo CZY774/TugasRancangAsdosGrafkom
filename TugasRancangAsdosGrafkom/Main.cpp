@@ -448,7 +448,7 @@ void drawTree(float x, float z) {
     glPushMatrix();
     glTranslatef(x, 0, z);
 
-    // Batang (lebih besar & tinggi)
+    // Batang
     glColor3f(0.55f, 0.27f, 0.07f);
     GLUquadric* trunk = gluNewQuadric();
     glPushMatrix();
@@ -457,23 +457,51 @@ void drawTree(float x, float z) {
     glPopMatrix();
     gluDeleteQuadric(trunk);
 
-    // Daun (lebih besar & tinggi)
+    // Level 1 daun (besar)
     glColor3f(0.0f, 0.5f, 0.0f);
-    GLUquadric* leaves = gluNewQuadric();
+    GLUquadric* leaves1 = gluNewQuadric();
     glPushMatrix();
     glTranslatef(0.0f, 7.0f, 0.0f);
     glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-    gluCylinder(leaves, 2.5f, 0.0f, 5.0f, 16, 16);
+    gluCylinder(leaves1, 4.0f, 0.0f, 4.0f, 16, 16);
     glPopMatrix();
-    gluDeleteQuadric(leaves);
+    gluDeleteQuadric(leaves1);
+
+    // Level 2 daun (sedang)
+    GLUquadric* leaves2 = gluNewQuadric();
+    glPushMatrix();
+    glTranslatef(0.0f, 11.0f, 0.0f);
+    glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+    gluCylinder(leaves2, 3.2f, 0.0f, 3.5f, 16, 16);
+    glPopMatrix();
+    gluDeleteQuadric(leaves2);
+
+    // Level 3 daun (kecil)
+    GLUquadric* leaves3 = gluNewQuadric();
+    glPushMatrix();
+    glTranslatef(0.0f, 14.0f, 0.0f);
+    glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+    gluCylinder(leaves3, 2.5f, 0.0f, 3.0f, 16, 16);
+    glPopMatrix();
+    gluDeleteQuadric(leaves3);
+
+    // Level 4 daun (puncak)
+    GLUquadric* leaves4 = gluNewQuadric();
+    glPushMatrix();
+    glTranslatef(0.0f, 17.0f, 0.0f);
+    glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+    gluCylinder(leaves4, 1.8f, 0.0f, 2.5f, 16, 16);
+    glPopMatrix();
+    gluDeleteQuadric(leaves4);
 
     glPopMatrix();
 }
 
+
 void drawRandomTrees() {
     srand(4321); // Seed tetap agar acak tapi konsisten
 
-    int treeCount = 100;  // Lebih banyak pohon
+    int treeCount = 500;  // Lebih banyak pohon
     int drawn = 0;
     int maxTry = 1000; // Dicukupkan agar nggak infinite loop
 
@@ -1385,19 +1413,20 @@ void drawGrassPatch(float x, float z) {
     glTranslatef(x, -0.48f, z); // letakkan di permukaan tanah
     glColor3f(0.2f, 0.8f, 0.2f); // hijau terang
 
-    // Gambar beberapa "helai" rumput (segitiga tipis)
     for (int i = 0; i < 5; ++i) {
         float angle = i * 72.0f; // 5 helai, menyebar
+        float height = 1.5f + 0.5f * (rand() % 100) / 100.0f; // tinggi 1.5 - 2.0
+
         glPushMatrix();
         glRotatef(angle, 0, 1, 0);
         glBegin(GL_TRIANGLES);
         glVertex3f(0.0f, 0.0f, 0.0f);
         glVertex3f(0.1f, 0.0f, 0.0f);
-        // glVertex3f(0.05f, 0.5f + 0.2f * (rand() % 100) / 100.0f, 0.0f);
-        glVertex3f(0.05f, 1.0f + 0.3f * (rand() % 100) / 100.0f, 0.0f);
+        glVertex3f(0.05f, height, 0.0f);
         glEnd();
         glPopMatrix();
     }
+
     glPopMatrix();
 }
 
@@ -1419,7 +1448,7 @@ void drawGrassPatches() {
 
     srand(5678); // Seed tetap agar posisi konsisten
     int count = 0, maxTry = 1000;
-    int grassCount = 60; // jumlah patch rumput
+    int grassCount = 500; // jumlah patch rumput
 
     while (count < grassCount && maxTry > 0) {
         float x = areaMinX + static_cast<float>(rand()) / RAND_MAX * (areaMaxX - areaMinX);
