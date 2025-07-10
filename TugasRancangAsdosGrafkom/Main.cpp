@@ -12,6 +12,9 @@
 #define WALL_HEIGHT 15.0f
 #define ROOF_HEIGHT 12.0f
 #define ROOF_OVERHANG 2.0f
+#define FLOOR_COLOR_R 0.7f
+#define FLOOR_COLOR_G 0.6f
+#define FLOOR_COLOR_B 0.5f
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -28,25 +31,20 @@ void init() {
     glEnable(GL_COLOR_MATERIAL);
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
-    // Tambahkan ini di init()
     GLfloat global_ambient[] = { 0.1f, 0.1f, 0.1f, 0.8f };
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
 
-    // Atur posisi dan parameter light yang lebih baik
-    GLfloat light_position[] = {30.0f, 50.0f, 30.0f, 1.0f};
-    GLfloat light_ambient[] = {0.4f, 0.4f, 0.4f, 1.0f};
-    GLfloat light_diffuse[] = {1.0f, 1.0f, 1.0f, 1.0f};
-    GLfloat light_specular[] = {1.0f, 1.0f, 1.0f, 1.0f};
+    GLfloat light_position[] = { 30.0f, 50.0f, 30.0f, 1.0f };
+    GLfloat light_ambient[] = { 0.4f, 0.4f, 0.4f, 1.0f };
+    GLfloat light_diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat light_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
     glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
-    
-    // Atur model lighting
+
     glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
-    
-    // Enable GL_NORMALIZE untuk normal vector yang konsisten
     glEnable(GL_NORMALIZE);
 
     glClearColor(0.5f, 0.8f, 1.0f, 1.0f);
@@ -82,9 +80,7 @@ void drawQuad(float x1, float y1, float z1,
     float x3, float y3, float z3,
     float x4, float y4, float z4) {
     glBegin(GL_QUADS);
-    // Hitung normal untuk face ini
     calculateNormal(x1, y1, z1, x2, y2, z2, x3, y3, z3);
-
     glVertex3f(x1, y1, z1);
     glVertex3f(x2, y2, z2);
     glVertex3f(x3, y3, z3);
@@ -93,37 +89,49 @@ void drawQuad(float x1, float y1, float z1,
 }
 
 void drawDoors() {
-    float doorWidth = 3.8f; // Lebar per daun pintu dikurangi agar muat 4
+    float doorWidth = 3.8f;
     float doorHeight = 10.0f;
-    float doorGap = 0.1f; // Celah tipis antar pintu (10cm)
-    float z = BUILDING_LENGTH / 2 + 0.01f;
-
-    glColor3f(0.6f, 0.6f, 0.7f); // Warna abu-abu metalik
-
-    // Posisi awal (ujung kiri blok pintu)
+    float doorGap = 0.1f;
+    float wallThickness = 0.3f;
+    float zOuter = BUILDING_LENGTH / 2 + 0.01f;
+    float zInner = BUILDING_LENGTH / 2 - wallThickness;
     float horizontalOffset = 7.0f;
-    float startX = -((4 * doorWidth) + (3 * doorGap)) / 2 + horizontalOffset; // Hitung posisi tengah
+    float startX = -((4 * doorWidth) + (3 * doorGap)) / 2 + horizontalOffset;
 
-    // Gambar 4 pintu berjejer rapat
+    // Outer doors
+    glColor3f(0.6f, 0.6f, 0.7f);
     for (int i = 0; i < 4; i++) {
         float xPos = startX + i * (doorWidth + doorGap);
-
-        drawQuad(xPos, 0, z,
-            xPos + doorWidth, 0, z,
-            xPos + doorWidth, doorHeight, z,
-            xPos, doorHeight, z);
+        drawQuad(xPos, 0, zOuter,
+            xPos + doorWidth, 0, zOuter,
+            xPos + doorWidth, doorHeight, zOuter,
+            xPos, doorHeight, zOuter);
     }
 
-    // Tambahkan gagang pintu
-    glColor3f(0.3f, 0.3f, 0.3f); // Warna gagang
+    // Inner doors (darker)
+    glColor3f(0.5f, 0.5f, 0.6f);
     for (int i = 0; i < 4; i++) {
         float xPos = startX + i * (doorWidth + doorGap);
+        drawQuad(xPos, 0, zInner,
+            xPos + doorWidth, 0, zInner,
+            xPos + doorWidth, doorHeight, zInner,
+            xPos, doorHeight, zInner);
+    }
 
-        // Gagang vertikal di setiap pintu
-        drawQuad(xPos + doorWidth - 0.2f, doorHeight * 0.4f, z + 0.02f,
-            xPos + doorWidth - 0.1f, doorHeight * 0.4f, z + 0.02f,
-            xPos + doorWidth - 0.1f, doorHeight * 0.6f, z + 0.02f,
-            xPos + doorWidth - 0.2f, doorHeight * 0.6f, z + 0.02f);
+    // Door handles
+    glColor3f(0.3f, 0.3f, 0.3f);
+    for (int i = 0; i < 4; i++) {
+        float xPos = startX + i * (doorWidth + doorGap);
+        // Outer handle
+        drawQuad(xPos + doorWidth - 0.2f, doorHeight * 0.4f, zOuter + 0.02f,
+            xPos + doorWidth - 0.1f, doorHeight * 0.4f, zOuter + 0.02f,
+            xPos + doorWidth - 0.1f, doorHeight * 0.6f, zOuter + 0.02f,
+            xPos + doorWidth - 0.2f, doorHeight * 0.6f, zOuter + 0.02f);
+        // Inner handle
+        drawQuad(xPos + 0.1f, doorHeight * 0.4f, zInner - 0.02f,
+            xPos + 0.2f, doorHeight * 0.4f, zInner - 0.02f,
+            xPos + 0.2f, doorHeight * 0.6f, zInner - 0.02f,
+            xPos + 0.1f, doorHeight * 0.6f, zInner - 0.02f);
     }
 }
 
@@ -138,15 +146,15 @@ void drawWalls() {
 
     // Dinding depan
     colorWalls();
-    drawQuad(-halfW, 0, halfL,  halfW, 0, halfL,  halfW, WALL_HEIGHT, halfL, -halfW, WALL_HEIGHT, halfL);
+    drawQuad(-halfW, 0, halfL, halfW, 0, halfL, halfW, WALL_HEIGHT, halfL, -halfW, WALL_HEIGHT, halfL);
 
     // Dinding belakang
     colorWalls();
     drawQuad(-halfW, 0, -halfL, halfW, 0, -halfL, halfW, WALL_HEIGHT, -halfL, -halfW, WALL_HEIGHT, -halfL);
-    
-    
+
+
     // ==== JENDELA BELAKANG ====
-    float jendelaSize = 5.0f; 
+    float jendelaSize = 5.0f;
     float gapX = 2.0f;        // jarak dari sisi kiri/kanan
     float baseY = 5.0f;
     float zBack = -halfL - 0.3f; // Sedikit maju agar muncul di atas dinding
@@ -160,7 +168,7 @@ void drawWalls() {
     float totalWidth = numWindows * jendelaSize + (numWindows - 1) * 1.0f;
     float startX = -totalWidth / 2.0f;
 
-    // Gambar jendela berjejer
+    // Gambar jendela berjejer di sisi luar
     for (int i = 0; i < numWindows; ++i) {
         float x1 = startX + i * (jendelaSize + 1.0f);
         float x2 = x1 + jendelaSize;
@@ -181,7 +189,7 @@ void drawWalls() {
 
     // Dinding kanan
     colorWalls();
-    drawQuad(halfW, 0, -halfL,  halfW, 0, halfL,  halfW, WALL_HEIGHT, halfL,  halfW, WALL_HEIGHT, -halfL);
+    drawQuad(halfW, 0, -halfL, halfW, 0, halfL, halfW, WALL_HEIGHT, halfL, halfW, WALL_HEIGHT, -halfL);
 
     // Pintu (di depan)
     drawDoors();
@@ -653,24 +661,24 @@ void drawJalan() {
 }
 
 void drawAlas() {
-    float pavingY = -0.48f;    // Sedikit di atas tanah
+    float pavingY = -0.48f;
+    float backPavingY = pavingY + 1.0f; // Higher in the back
     float zDepan = BUILDING_LENGTH / 2;
-    float zBelakang = -BUILDING_LENGTH / 2 - 8.5f; // extend sampai ujung kanopi belakang
+    float zBelakang = -BUILDING_LENGTH / 2 - 8.5f;
     float halfW = BUILDING_WIDTH / 2;
-    float gedungSampingWidth = 10.0f;
-    float jarakAntarBangunan = 8.0f;
-    float pavingKanan = halfW + jarakAntarBangunan + gedungSampingWidth; // kanan sampai ujung gedung kecil
-    float pavingKiri = -halfW; // kiri tetap di ujung bangunan utama
 
-    // Warna semen/concrete: abu muda keabu-abuan
-    glColor3f(0.78f, 0.78f, 0.76f);
+    // Main floor (same color as badminton court)
+    glColor3f(FLOOR_COLOR_R, FLOOR_COLOR_G, FLOOR_COLOR_B);
+    drawQuad(-halfW, pavingY, zBelakang,
+        halfW, pavingY, zBelakang,
+        halfW, pavingY, zDepan + 15.0f,
+        -halfW, pavingY, zDepan + 15.0f);
 
-    drawQuad(
-        pavingKiri, pavingY, zBelakang,
-        pavingKanan, pavingY, zBelakang,
-        pavingKanan, pavingY, zDepan + 15.0f, // tetap sampai depan paving teras
-        pavingKiri, pavingY, zDepan + 15.0f
-    );
+    // Back area (higher)
+    drawQuad(-halfW, backPavingY, zBelakang - 8.5f,
+        halfW, backPavingY, zBelakang - 8.5f,
+        halfW, backPavingY, zBelakang,
+        -halfW, backPavingY, zBelakang);
 }
 
 void drawKanopiBelakang() {
