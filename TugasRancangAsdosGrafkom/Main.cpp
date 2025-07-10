@@ -28,6 +28,7 @@
 float rotateX = 0.0f, rotateY = 0.0f, translateZ = -50.0f;
 int lastMouseX, lastMouseY;
 bool mousePressed = false;
+bool lightingEnabled = true;
 
 void init() {
     glEnable(GL_DEPTH_TEST);
@@ -1302,6 +1303,207 @@ void drawGround() {
     glEnable(GL_LIGHTING);   // Nyalakan kembali lighting
 }
 
+void drawBadmintonRacket(float x, float y, float z, bool facingRight) {
+    glPushMatrix();
+    glTranslatef(x, y, z);
+
+    // Handle (longer and thicker)
+    glColor3f(0.8f, 0.8f, 0.8f); // Silver color
+    GLUquadric* handle = gluNewQuadric();
+    glRotatef(90, 0, 1, 0);
+    gluCylinder(handle, 0.08f, 0.08f, 0.8f, 10, 1); // Increased size
+
+    // Head (larger circular)
+    glPushMatrix();
+    glTranslatef(0, 0, 0.8f); // Adjusted for longer handle
+    glRotatef(90, 1, 0, 0);
+    glutSolidTorus(0.01f, 0.3f, 10, 20); // Thicker rim
+    glColor3f(0.95f, 0.95f, 0.95f); // White strings
+
+    // Vertical strings
+    for (int i = 0; i < 8; i++) {
+        float angle = i * 22.5f;
+        glPushMatrix();
+        glRotatef(angle, 0, 0, 1);
+        glBegin(GL_LINES);
+        glVertex3f(-0.3f, 0, 0);
+        glVertex3f(0.3f, 0, 0);
+        glEnd();
+        glPopMatrix();
+    }
+
+    // Horizontal strings
+    for (int i = 0; i < 5; i++) {
+        float radius = 0.25f - (i * 0.05f);
+        glBegin(GL_LINE_LOOP);
+        for (int j = 0; j < 36; j++) {
+            float angle = j * 10.0f;
+            glVertex3f(radius * cos(angle * M_PI / 180.0f),
+                radius * sin(angle * M_PI / 180.0f),
+                0);
+        }
+        glEnd();
+    }
+    glPopMatrix();
+
+    glPopMatrix();
+    gluDeleteQuadric(handle);
+}
+
+void drawShuttlecock(float x, float y, float z) {
+    glPushMatrix();
+    glTranslatef(x, y, z);
+
+    // Base (cork) - larger
+    glColor3f(0.8f, 0.7f, 0.5f); // Cork color
+    glutSolidSphere(0.08f, 10, 10);
+
+    // Feathers - more accurate to real shuttlecock
+    glColor3f(0.9f, 0.9f, 0.9f); // Off-white feathers
+
+    // Feather stem (goose feather part)
+    glBegin(GL_QUADS);
+    for (int i = 0; i < 16; i++) {
+        float angle1 = i * 22.5f;
+        float angle2 = (i + 1) * 22.5f;
+        float radius = 0.25f;
+
+        glVertex3f(0, 0, 0);
+        glVertex3f(radius * cos(angle1 * M_PI / 180.0f),
+            radius * sin(angle1 * M_PI / 180.0f),
+            0.4f);
+        glVertex3f(radius * cos(angle2 * M_PI / 180.0f),
+            radius * sin(angle2 * M_PI / 180.0f),
+            0.4f);
+        glVertex3f(0, 0, 0);
+    }
+    glEnd();
+
+    // Feather tips
+    glColor3f(0.7f, 0.7f, 0.7f); // Darker for tips
+    for (int i = 0; i < 16; i++) {
+        float angle = i * 22.5f;
+        float radius = 0.25f;
+
+        glBegin(GL_TRIANGLES);
+        glVertex3f(radius * cos(angle * M_PI / 180.0f),
+            radius * sin(angle * M_PI / 180.0f),
+            0.4f);
+        glVertex3f(radius * 1.3f * cos(angle * M_PI / 180.0f),
+            radius * 1.3f * sin(angle * M_PI / 180.0f),
+            0.6f);
+        glVertex3f(radius * cos((angle + 11.25f) * M_PI / 180.0f),
+            radius * sin((angle + 11.25f) * M_PI / 180.0f),
+            0.4f);
+        glEnd();
+    }
+
+    glPopMatrix();
+}
+
+void drawScoreboard() {
+    float boardWidth = 3.0f;  // Lebar scoreboard
+    float boardHeight = 2.0f; // Tinggi scoreboard
+    float boardThickness = 0.1f;
+    float boardY = 0.0f;      // Posisi Y (menyentuh tanah)
+
+    // Papan utama scoreboard
+    glColor3f(0.2f, 0.2f, 0.2f); // Warna abu-abu gelap
+    drawQuad(-boardWidth / 2, boardY, -boardThickness,
+        boardWidth / 2, boardY, -boardThickness,
+        boardWidth / 2, boardY + boardHeight, -boardThickness,
+        -boardWidth / 2, boardY + boardHeight, -boardThickness);
+
+    // Bingkai scoreboard
+    glColor3f(0.8f, 0.8f, 0.8f); // Warna silver
+    float frameSize = 0.1f;
+    // Bingkai bawah
+    drawQuad(-boardWidth / 2 - frameSize, boardY, -boardThickness - 0.01f,
+        boardWidth / 2 + frameSize, boardY, -boardThickness - 0.01f,
+        boardWidth / 2 + frameSize, boardY + frameSize, -boardThickness - 0.01f,
+        -boardWidth / 2 - frameSize, boardY + frameSize, -boardThickness - 0.01f);
+    // Bingkai atas
+    drawQuad(-boardWidth / 2 - frameSize, boardY + boardHeight - frameSize, -boardThickness - 0.01f,
+        boardWidth / 2 + frameSize, boardY + boardHeight - frameSize, -boardThickness - 0.01f,
+        boardWidth / 2 + frameSize, boardY + boardHeight, -boardThickness - 0.01f,
+        -boardWidth / 2 - frameSize, boardY + boardHeight, -boardThickness - 0.01f);
+    // Bingkai kiri
+    drawQuad(-boardWidth / 2 - frameSize, boardY, -boardThickness - 0.01f,
+        -boardWidth / 2, boardY, -boardThickness - 0.01f,
+        -boardWidth / 2, boardY + boardHeight, -boardThickness - 0.01f,
+        -boardWidth / 2 - frameSize, boardY + boardHeight, -boardThickness - 0.01f);
+    // Bingkai kanan
+    drawQuad(boardWidth / 2, boardY, -boardThickness - 0.01f,
+        boardWidth / 2 + frameSize, boardY, -boardThickness - 0.01f,
+        boardWidth / 2 + frameSize, boardY + boardHeight, -boardThickness - 0.01f,
+        boardWidth / 2, boardY + boardHeight, -boardThickness - 0.01f);
+
+    // Area skor pemain (kiri dan kanan)
+    glColor3f(0.1f, 0.1f, 0.5f); // Warna biru gelap
+    // Skor kiri
+    drawQuad(-boardWidth / 2 + 0.3f, boardY + boardHeight / 2 + 0.3f, 0.0f,
+        -boardWidth / 2 + 1.2f, boardY + boardHeight / 2 + 0.3f, 0.0f,
+        -boardWidth / 2 + 1.2f, boardY + boardHeight / 2 + 1.1f, 0.0f,
+        -boardWidth / 2 + 0.3f, boardY + boardHeight / 2 + 1.1f, 0.0f);
+    // Skor kanan
+    drawQuad(boardWidth / 2 - 1.2f, boardY + boardHeight / 2 + 0.3f, 0.0f,
+        boardWidth / 2 - 0.3f, boardY + boardHeight / 2 + 0.3f, 0.0f,
+        boardWidth / 2 - 0.3f, boardY + boardHeight / 2 + 1.1f, 0.0f,
+        boardWidth / 2 - 1.2f, boardY + boardHeight / 2 + 1.1f, 0.0f);
+
+    // Kaki penyangga scoreboard
+    glColor3f(0.5f, 0.5f, 0.5f); // Warna abu-abu
+    drawQuad(-0.15f, boardY, -1.0f,
+        0.15f, boardY, -1.0f,
+        0.15f, boardY + boardHeight / 2, -boardThickness,
+        -0.15f, boardY + boardHeight / 2, -boardThickness);
+}
+
+void drawRefereeChair(float x, float z, float rotationAngle = 0.0f) {
+    glPushMatrix();
+    glTranslatef(x, 0, z);          // Pindahkan ke posisi (x, 0, z)
+    glRotatef(rotationAngle, 0, 1, 0); // Rotasi pada sumbu Y (vertikal)
+
+    // Kursi (dudukannya)
+    glColor3f(0.5f, 0.3f, 0.1f); // Warna kayu
+    drawQuad(-0.4f, 0.0f, -0.4f,
+        0.4f, 0.0f, -0.4f,
+        0.4f, 0.0f, 0.4f,
+        -0.4f, 0.0f, 0.4f);
+
+    // Sandaran kursi (lebih tinggi)
+    glColor3f(0.5f, 0.3f, 0.1f);
+    drawQuad(-0.4f, 0.0f, 0.3f,
+        0.4f, 0.0f, 0.3f,
+        0.4f, 1.2f, 0.3f,
+        -0.4f, 1.2f, 0.3f);
+
+    // Kaki kursi (4 kaki)
+    glColor3f(0.3f, 0.3f, 0.3f); // Warna metal
+    // Kaki depan kiri
+    drawQuad(-0.3f, -0.5f, -0.3f,
+        -0.2f, -0.5f, -0.3f,
+        -0.2f, 0.0f, -0.3f,
+        -0.3f, 0.0f, -0.3f);
+    // Kaki depan kanan
+    drawQuad(0.2f, -0.5f, -0.3f,
+        0.3f, -0.5f, -0.3f,
+        0.3f, 0.0f, -0.3f,
+        0.2f, 0.0f, -0.3f);
+    // Kaki belakang kiri
+    drawQuad(-0.3f, -0.5f, 0.3f,
+        -0.2f, -0.5f, 0.3f,
+        -0.2f, 0.0f, 0.3f,
+        -0.3f, 0.0f, 0.3f);
+    // Kaki belakang kanan
+    drawQuad(0.2f, -0.5f, 0.3f,
+        0.3f, -0.5f, 0.3f,
+        0.3f, 0.0f, 0.3f,
+        0.2f, 0.0f, 0.3f);
+
+    glPopMatrix();
+}
+
 void drawBadmintonCourt() {
     // Ukuran lapangan badminton standar (diperbesar 250%)
     float scale = 2.5f;
@@ -1314,6 +1516,29 @@ void drawBadmintonCourt() {
     float courtX = 0.0f;
     float courtZ = 0.0f;
     float courtY = -0.4f;
+
+    // Rackets (on the ground near service lines)
+    drawBadmintonRacket(-4.0f, 0.0f, 5.0f, true);  // Left side racket
+    drawBadmintonRacket(4.0f, 0.0f, -5.0f, false); // Right side racket
+
+    // Shuttlecocks (on the ground)
+    drawShuttlecock(0.0f, 0.08f, 0.5f);  // Near the net
+    drawShuttlecock(-3.0f, 0.08f, 4.0f); // Left side
+    drawShuttlecock(2.5f, 0.08f, -3.5f); // Right side
+
+    // Scoreboard (dipindahkan ke dekat tiang kiri net)
+    glPushMatrix();
+    glTranslatef(-courtWidth / 2 - 2.0f, 0.0f, 0.0f); // Posisi dekat tiang kiri
+    glRotatef(90.0f, 0.0f, 1.0f, 0.0f); // Putar 90 derajat agar menghadap ke lapangan
+    drawScoreboard();
+    glPopMatrix();
+
+    // Referee chairs (dipindahkan ke dekat tiang net)
+    // Kursi wasit kiri (menghadap ke lapangan, rotasi 90 derajat)
+    drawRefereeChair(-courtWidth / 2 - 5.5f, 1.0f, -90.0f);
+
+    // Kursi wasit kanan (menghadap ke lapangan, rotasi -90 derajat)
+    drawRefereeChair(courtWidth / 2 + 3.5f, 1.0f, 90.0f);
 
     // Lantai keramik cokelat muda
     glColor3f(0.7f, 0.6f, 0.5f);
@@ -1444,6 +1669,7 @@ void drawBadmintonCourt() {
         courtWidth / 2, netTop, courtZ + 0.05f,
         -courtWidth / 2, netTop, courtZ + 0.05f);
 }
+
 
 void drawLights() {
     // Nonaktifkan lighting sementara untuk menggambar visual lampu
@@ -1837,6 +2063,23 @@ void keyboard(unsigned char key, int, int) {
     if (key == 'q') rotateX -= 5.0f;
     if (key == 'e') rotateX += 5.0f;
     if (key == 'r') { rotateX = rotateY = 0; translateZ = -50; }
+    if (key == 'l') {
+        lightingEnabled = !lightingEnabled;
+        if (lightingEnabled) {
+            glEnable(GL_LIGHTING);
+            glEnable(GL_LIGHT0);
+            for (int i = 1; i <= 8; i++) {
+                glEnable(GL_LIGHT1 + i);
+            }
+        }
+        else {
+            glDisable(GL_LIGHTING);
+            glDisable(GL_LIGHT0);
+            for (int i = 1; i <= 8; i++) {
+                glDisable(GL_LIGHT1 + i);
+            }
+        }
+    }
     glutPostRedisplay();
 }
 
